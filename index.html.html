@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copper Ridge Case File — IA Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1c2530;
+    --surface: #24303d;
+    --surface-raised: #2c3b4a;
+    --line: #3b4b5c;
+    --copper: #F37135;
+    --copper-bright: #FF9558;
+    --copper-deep: #C6501A;
+    --blue: #73A3CF;
+    --blue-deep: #4A7FA8;
+    --paper: #eee7d8;
+    --paper-dim: #a9b0b8;
+    --pass: #6a9b6e;
+    --pass-deep: #3f6b45;
+    --pass-bg: rgba(106,155,110,0.12);
+    --fail: #c1614f;
+    --fail-deep: #9c3f30;
+    --fail-bg: rgba(193,97,79,0.12);
+    --paper-card: #f7f2e8;
+    --paper-card-alt: #eee7d5;
+    --line-light: #dcd3bd;
+    --ink: #2b2820;
+    --ink-soft: #453f30;
+    --ink-dim: #756c54;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .app{display:flex;min-height:100vh;}
+
+  /* Sidebar */
+  .sidebar{
+    width:280px;
+    flex-shrink:0;
+    background:var(--surface);
+    border-right:1px solid var(--line);
+    padding:28px 0;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .brand{
+    padding:0 22px 22px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:8px;
+  }
+  .brand .eyebrow{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--copper-bright); margin-bottom:6px;
+  }
+  .brand h1{
+    font-family:'Oswald',sans-serif; font-size:20px; font-weight:600; text-transform:uppercase; letter-spacing:.02em;
+    margin:0; line-height:1.25; color:var(--paper);
+  }
+  .brand .sub{font-size:12px; color:var(--paper-dim); margin-top:6px;}
+
+  .nav-item{
+    display:flex; align-items:flex-start; gap:12px;
+    padding:13px 22px; cursor:pointer;
+    border-left:3px solid transparent;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .nav-item:hover{background:var(--surface-raised);}
+  .nav-item.active{
+    background:var(--surface-raised);
+    border-left-color:var(--copper);
+  }
+  .nav-num{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:11px;
+    color:var(--copper-bright); padding-top:2px; flex-shrink:0; width:16px;
+  }
+  .nav-label{font-size:13.5px; line-height:1.4; color:var(--paper);}
+  .nav-item.active .nav-label{color:var(--copper-bright); font-weight:600;}
+  .nav-stage{font-size:11px; color:var(--paper-dim); margin-top:2px;}
+  .nav-status{
+    margin-left:auto; font-size:14px; flex-shrink:0; padding-top:1px;
+  }
+  .final-item{
+    margin-top:8px; border-top:1px solid var(--line); padding-top:16px;
+  }
+  .resource-links{
+    margin-top:20px; padding:16px 22px; border-top:1px solid var(--line);
+  }
+  .resource-links-label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    font-size:9.5px; color:var(--paper-dim); margin-bottom:10px;
+  }
+  .resource-link{
+    display:block; font-size:12.5px; color:var(--blue); text-decoration:none;
+    padding:6px 0; border-bottom:1px solid transparent; line-height:1.4;
+  }
+  .resource-link:hover{color:var(--copper-bright); text-decoration:underline;}
+
+  /* Main */
+  .main{
+    flex:0 1 820px; padding:44px 56px;
+    background:var(--paper-card);
+    min-height:100vh;
+    box-shadow: -1px 0 0 var(--line) inset;
+  }
+  .vocab-inline-wrap{
+    display:flex; flex-wrap:wrap; gap:12px; margin:10px 0 20px;
+  }
+  .vocab-bubble-inline{
+    background:var(--paper-card-alt); border:1px solid var(--blue); border-radius:12px;
+    padding:12px 16px; max-width:260px; flex:1 1 220px;
+  }
+  .vocab-bubble-inline .term{
+    font-family:'Oswald',sans-serif; font-weight:600; font-size:15.5px; color:var(--blue-deep); margin-bottom:4px; text-transform:uppercase; letter-spacing:.02em;
+  }
+  .vocab-bubble-inline .def{font-size:13px; line-height:1.5; color:var(--ink-soft);}
+
+  .vocab-rail{
+    flex:1; min-width:0; padding:44px 20px; display:none;
+  }
+  @media(min-width:1180px){
+    .vocab-rail{display:block;}
+  }
+  .vocab-rail-inner{position:sticky; top:44px;}
+  .vocab-rail-label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--paper-dim); margin-bottom:16px; padding-left:4px;
+  }
+  .vocab-bubble{
+    background:var(--surface-raised); border:1px solid var(--blue); border-radius:14px;
+    padding:14px 16px; margin-bottom:14px; max-width:210px;
+  }
+  .vocab-bubble .term{
+    font-family:'Oswald',sans-serif; font-weight:600; font-size:15.5px; color:var(--blue); margin-bottom:5px; text-transform:uppercase; letter-spacing:.02em;
+  }
+  .vocab-bubble .def{font-size:12.5px; line-height:1.5; color:var(--paper);}
+
+  .page-nav{
+    display:flex; align-items:center; justify-content:space-between; margin-top:24px;
+    padding-top:16px; border-top:1px solid var(--line-light);
+  }
+  .page-dots{display:flex; gap:6px;}
+  .page-dot{width:7px; height:7px; border-radius:50%; background:var(--line-light); cursor:pointer;}
+  .page-dot.active{background:var(--copper-deep); width:20px; border-radius:4px;}
+  .page-btn{
+    background:none; border:1px solid var(--line-light); color:var(--copper-deep);
+    border-radius:5px; font-size:13px; padding:8px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:600;
+  }
+  .page-btn:hover{background:rgba(148,85,31,0.06);}
+  .page-btn:disabled{opacity:.3; cursor:not-allowed;}
+  .page-title{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-dim); margin-bottom:12px;
+  }
+  .stage-tag{
+    display:inline-block; font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--copper-deep); background:rgba(148,85,31,0.09);
+    border:1px solid rgba(148,85,31,0.3); border-radius:3px;
+    padding:4px 9px; margin-bottom:14px;
+  }
+  h2.module-title{
+    font-family:'Oswald',sans-serif; font-size:34px; font-weight:600; text-transform:uppercase; letter-spacing:.01em;
+    margin:0 0 6px; color:var(--ink); line-height:1.2;
+  }
+  .module-stage-line{
+    font-size:14.5px; color:var(--ink-dim); font-style:italic; margin-bottom:20px;
+  }
+  .tab-continue-row{
+    display:flex; justify-content:flex-end; margin-top:20px; padding-top:16px; border-top:1px solid var(--line-light);
+  }
+  .continue-btn{
+    background:var(--copper); color:#fff; border:none; border-radius:5px;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; letter-spacing:.02em;
+    padding:11px 20px; cursor:pointer; transition:background .15s ease;
+  }
+  .continue-btn:hover{background:var(--copper-deep);}
+
+  .fppl-badge{
+    display:inline-block; background:rgba(106,155,110,0.08); border:1px solid var(--pass-deep); border-radius:20px;
+    padding:6px 14px; margin:4px 0 20px; font-size:12px; color:var(--ink-dim); line-height:1.4;
+  }
+  .fppl-label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:9px;
+    color:var(--pass-deep); margin-right:6px;
+  }
+
+  .tabs{display:flex; gap:2px; margin-bottom:28px; border-bottom:1px solid var(--line-light);}
+  .tab{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:11.5px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-dim); background:none; border:none;
+    padding:11px 4px; margin-right:26px; cursor:pointer; border-bottom:2px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .tab:hover{color:var(--ink);}
+  .tab.active{color:var(--copper-deep); border-bottom-color:var(--copper);}
+
+  .panel{display:none;}
+  .panel.active{display:block; animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .content-text p{font-size:15.5px; line-height:1.75; color:var(--ink-soft); margin:0 0 16px;}
+  .content-text strong{color:var(--ink);}
+
+  .example-box{
+    background:rgba(148,85,31,0.06); border-left:3px solid var(--copper-deep);
+    border-radius:4px; padding:14px 18px; margin:6px 0 24px;
+  }
+  .example-box .label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--copper-deep); margin-bottom:6px;
+  }
+  .example-box p{font-size:14.5px; line-height:1.65; color:var(--ink-soft); margin:0;}
+
+  .diagram-box{
+    background:var(--paper-card-alt); border:1px solid var(--line-light); border-radius:6px;
+    padding:20px; margin:0 0 24px; text-align:center;
+  }
+  .diagram-box svg{max-width:100%; height:auto;}
+  .diagram-caption{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10.5px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-dim); margin-top:10px;
+  }
+
+  .model-toggle{
+    margin-bottom:14px; background:none; border:1px solid var(--copper); color:var(--copper-deep);
+    border-radius:5px; font-size:13px; padding:9px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:600;
+  }
+  .model-toggle:hover{background:rgba(148,85,31,0.06);}
+  .model-panel{
+    margin-bottom:16px; background:rgba(193,122,63,0.07); border:1px solid var(--copper);
+    border-radius:6px; padding:16px 20px;
+  }
+  .model-panel .label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--copper-deep); margin-bottom:8px;
+  }
+  .model-panel p{font-size:14px; line-height:1.7; color:var(--ink-soft); margin:0; font-style:italic;}
+
+  .compare-table{
+    display:flex; gap:16px; margin:14px 0 20px; flex-wrap:wrap;
+  }
+  .compare-col{
+    flex:1 1 220px; background:var(--paper-card-alt); border:1px solid var(--line-light);
+    border-radius:6px; padding:16px 18px;
+  }
+  .compare-head{
+    font-family:'Oswald',sans-serif; font-weight:600; font-size:15px; text-transform:uppercase;
+    letter-spacing:.02em; color:var(--copper-deep); margin-bottom:10px;
+  }
+  .compare-col ul{margin:0; padding-left:18px; color:var(--ink-soft); font-size:13.5px; line-height:1.7;}
+
+  .stage-qa-box{
+    background:var(--paper-card-alt); border:1px solid var(--line-light); border-radius:6px;
+    padding:20px 24px; margin:0 0 24px;
+  }
+  .stage-qa-box .label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--copper-deep); margin-bottom:14px;
+  }
+  .stage-qa-item{margin-bottom:16px;}
+  .stage-qa-item:last-child{margin-bottom:0;}
+  .stage-qa-q{
+    font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:6px; line-height:1.5;
+  }
+  .stage-qa-a{
+    font-size:14px; color:var(--ink-soft); line-height:1.6; padding-left:14px;
+    border-left:2px solid var(--copper);
+  }
+
+  .template-intro{
+    font-size:14.5px; line-height:1.7; color:var(--ink-soft); margin-bottom:24px;
+  }
+  .template-section{
+    margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--line-light);
+  }
+  .template-section:last-child{border-bottom:none;}
+  .template-section h3{
+    font-family:'Oswald',sans-serif; font-size:18px; font-weight:600; color:var(--copper-deep); margin:0 0 10px; text-transform:uppercase; letter-spacing:.02em;
+  }
+  .template-section ul{margin:0 0 10px 18px; padding:0; color:var(--ink-dim); font-size:13.5px; line-height:1.8;}
+  .template-textarea{
+    width:100%; min-height:90px; background:#fffdf7; border:1px solid var(--line-light);
+    border-radius:5px; color:var(--ink); font-family:'Inter',sans-serif; font-size:14px; padding:12px 14px; resize:vertical;
+  }
+  .template-textarea:focus{outline:none; border-color:var(--copper-deep);}
+
+  .next-steps-note{
+    margin-top:8px; padding:16px 20px; background:rgba(148,85,31,0.06);
+    border:1px dashed var(--copper); border-radius:6px;
+    font-size:14px; color:var(--ink-soft); line-height:1.6; text-align:center;
+  }
+  .next-steps-note strong{color:var(--copper-deep);}
+
+  .selfcheck-toggle{
+    margin-top:14px; background:none; border:1px solid var(--line-light); color:var(--copper-deep);
+    border-radius:5px; font-size:13px; padding:9px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:600;
+  }
+  .selfcheck-toggle:hover{background:rgba(148,85,31,0.06);}
+  .selfcheck-panel{
+    margin-top:14px; background:rgba(106,155,110,0.07); border:1px solid var(--pass-deep);
+    border-radius:6px; padding:16px 20px;
+  }
+  .selfcheck-panel .label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--pass-deep); margin-bottom:8px;
+  }
+  .selfcheck-panel .disclaimer{font-size:12px; color:var(--ink-dim); margin-bottom:10px; font-style:italic;}
+  .selfcheck-panel ul{margin:0 0 0 18px; padding:0; color:var(--ink-soft); font-size:14px; line-height:1.75;}
+
+  .assignment-box{
+    background:var(--paper-card-alt); border:1px solid var(--line-light); border-radius:6px;
+    padding:22px 24px; margin-top:6px;
+  }
+  .assignment-box .label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:10.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--copper-deep); margin-bottom:10px;
+  }
+  .assignment-box p{font-size:15px; line-height:1.7; color:var(--ink-soft); margin:0 0 12px;}
+  .assignment-box ul{margin:0 0 0 18px; padding:0; color:var(--ink-soft); font-size:14.5px; line-height:1.8;}
+  textarea.log{
+    width:100%; min-height:120px; margin-top:14px; background:#fffdf7;
+    border:1px solid var(--line-light); border-radius:5px; color:var(--ink);
+    font-family:'Inter',sans-serif; font-size:14px; padding:12px 14px; resize:vertical;
+  }
+  textarea.log:focus{outline:none; border-color:var(--copper-deep);}
+  .log-hint{font-size:11.5px; color:var(--ink-dim); margin-top:8px;}
+
+  .quiz-q{
+    background:var(--paper-card-alt); border:1px solid var(--line-light); border-radius:6px;
+    padding:20px 22px; margin-bottom:14px;
+  }
+  .quiz-q .qnum{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:11px; color:var(--copper-deep); margin-bottom:8px;
+  }
+  .quiz-q .qtext{font-size:15px; color:var(--ink); margin-bottom:14px; line-height:1.5;}
+  .option{
+    display:flex; align-items:flex-start; gap:10px; padding:9px 10px;
+    border-radius:4px; cursor:pointer; margin-bottom:2px; transition:background .12s ease;
+  }
+  .option:hover{background:rgba(43,40,32,0.05);}
+  .option input{margin-top:3px; accent-color:var(--copper-deep);}
+  .option label{font-size:14px; color:var(--ink-soft); cursor:pointer; line-height:1.5;}
+
+  .quiz-actions{display:flex; align-items:center; gap:16px; margin-top:20px;}
+  button.primary{
+    background:var(--copper); color:#1b211d; border:none; border-radius:5px;
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14px;
+    padding:11px 22px; cursor:pointer; transition:background .15s ease;
+  }
+  button.primary:hover{background:var(--copper-bright);}
+  button.ghost{
+    background:none; border:1px solid var(--line-light); color:var(--ink-dim);
+    border-radius:5px; font-size:13.5px; padding:10px 18px; cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--copper-deep); color:var(--copper-deep);}
+
+  .result-banner{
+    margin-top:22px; padding:20px 24px; border-radius:6px; border:1px solid;
+    display:flex; align-items:center; gap:18px;
+  }
+  .result-banner.pass{background:var(--pass-bg); border-color:var(--pass-deep);}
+  .result-banner.fail{background:var(--fail-bg); border-color:var(--fail-deep);}
+  .stamp{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-weight:700; font-size:13px;
+    letter-spacing:.08em; padding:8px 14px; border-radius:4px; border:2px solid;
+    transform:rotate(-4deg); flex-shrink:0;
+  }
+  .stamp.pass{color:var(--pass-deep); border-color:var(--pass-deep);}
+  .stamp.fail{color:var(--fail-deep); border-color:var(--fail-deep);}
+  .result-text .score{font-size:15px; font-weight:600; margin-bottom:2px; color:var(--ink);}
+  .result-text .detail{font-size:13px; color:var(--ink-dim);}
+
+  .progress-strip{
+    display:flex; gap:4px; margin-bottom:10px;
+  }
+  .progress-dot{
+    flex:1; height:4px; border-radius:2px; background:var(--line-light);
+  }
+  .progress-dot.done{background:var(--pass-deep);}
+  .progress-dot.failed{background:var(--fail-deep);}
+
+  ::-webkit-scrollbar{width:9px;}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:5px;}
+
+  @media(max-width:820px){
+    .app{flex-direction:column;}
+    .sidebar{width:100%; height:auto; position:relative;}
+    .main{padding:28px 20px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+  <aside class="vocab-rail" id="vocabRail"></aside>
+</div>
+
+<script>
+const FNMPC_RESOURCES = [
+  { label:"Don't Tickety Box Me (film)", url:"https://fnmpc.ca/tools-resources/environmental-tools/" },
+  { label:"Intro to Indigenous-Led Assessment", url:"https://fnmpc.ca/wp-content/uploads/FNMPC_FL_ILA_singles_09182025_web.pdf" },
+  { label:"Spirit of the Land Primer", url:"https://fnmpc.ca/wp-content/uploads/SOTL_PRIMER_01162026_web.pdf" },
+  { label:"Spirit of the Land Implementation Guide", url:"https://fnmpc.ca/wp-content/uploads/SOTL_IMPLEMENTATION_01162026_web.pdf" },
+  { label:"Guide: Federal Impact Assessment", url:"https://fnmpc.ca/wp-content/uploads/FNMPC_Guide_Oct15202_FINAL.pdf" },
+  { label:"Primer: BC Impact Assessment", url:"https://fnmpc.ca/wp-content/uploads/Sept-13-2023-FNMPC-Primer-for-BC-EA-FINAL.pdf" },
+  { label:"Major Project Assessment Standard", url:"https://fnmpc.ca/wp-content/uploads/FNMPCMPASFINAL.pdf" },
+  { label:"All Tools & Resources", url:"https://fnmpc.ca/tools-resources/" },
+];
+
+const CASE_FILE_TEMPLATE = [
+  {
+    heading:"1. Initial Case File",
+    prompts:[
+      "What do we already know about this project?",
+      "What questions do we still need answered?"
+    ]
+  },
+  {
+    heading:"2. Phase 0 Readiness Check",
+    prompts:[
+      "Capacity: what staff, time, or expertise do we have right now?",
+      "Mandate: does leadership have clear direction to engage on this?",
+      "Information gaps: what do we still not know?",
+      "Recommendation: engage now, or wait? Why?"
+    ]
+  },
+  {
+    heading:"3. Our Nation's Major Project Standard",
+    prompts:[
+      "What criteria will we use to judge this project?",
+      "Why does each criterion matter to us, regardless of what government requires?"
+    ]
+  },
+  {
+    heading:"4. Federal Impact Assessment Timeline",
+    prompts:[
+      "What are the key stages and dates for this project's federal review, if any?",
+      "Where are the high-leverage points where our input matters most?"
+    ]
+  },
+  {
+    heading:"5. Jurisdictional (Provincial) Impact Assessment",
+    prompts:[
+      "What provincial or other review process also applies here, if any?",
+      "Where do the federal and provincial requirements overlap or conflict?"
+    ]
+  },
+  {
+    heading:"6. Indigenous-led Assessment Scope",
+    prompts:[
+      "What will our own review look at that other reviews might miss?",
+      "Who will conduct it, and against what standards?",
+      "What is our rough timeline, relative to other processes underway?"
+    ]
+  },
+  {
+    heading:"7. Cultural Rights Assessment",
+    prompts:[
+      "What site, practice, or right is at stake, and why does it matter to us?",
+      "What specific impacts would this project cause?",
+      "What protections or alternatives would need to be in place for this to proceed, if at all?"
+    ]
+  }
+];
+
+const MODULES = [
+  {
+    id:1,
+    title:"Introduction to Impact Assessment",
+    stage:"The rumor",
+    fppl:"Learning is embedded in memory, history, and story.",
+    pages:[
+      {
+        title:"Page 1 of 3 — The Story Begins",
+        paragraphs:[
+          "Before the story starts, here's the short version: an <strong>Impact Assessment (IA)</strong> is the process used to study what a major project might do to the land, water, community, and rights of the people who live there — before anyone decides whether it can go ahead.",
+          "A mining company wants to dig a big open-pit copper mine. They call it the <strong>Copper Ridge Project</strong>. Picture a forested valley about 40 kilometers from Tsilaqw Nation's main village — a river runs through it that salmon return to every fall, and it's part of the drinking water for communities downstream. The company wants to carve a pit nearly two kilometers wide into the side of that valley, and says the project could bring 200 jobs to the region.",
+          "The land they want is close to Tsilaqw Nation. The company has not asked yet. They have not filed any paperwork. But word travels fast — and Tsilaqw Nation has already heard the rumor.",
+          "Right now, nothing is official. But the Nation's IA coordinator knows: the moment you hear about a project, the clock starts — even before anyone from government gets involved.",
+          "This is where our story begins."
+        ]
+      },
+      {
+        title:"Page 2 of 3 — Three Words to Know",
+        paragraphs:[
+          "Before we go further, let's learn three words. You will see them again and again in this course. Look for them in the vocabulary bubbles on this page.",
+          "One common kind of trigger is a <strong>size rule</strong> — a law that says a project must reach a certain size before a formal review is required."
+        ]
+      },
+      {
+        title:"Page 3 of 3 — Starting the Case File",
+        paragraphs:[
+          "Think about how an Elder keeps track of a family's history — who is related to whom, what happened, what was promised. They hold it carefully, and they pass it on.",
+          "Tsilaqw Nation's IA coordinator does something similar, but for this project. They start a <strong>case file</strong>: a written record of what is known, what is still unknown, and what choices get made along the way.",
+          "The case file starts today — before any government process has even begun. That's the whole point: don't wait for permission to start paying attention."
+        ]
+      }
+    ],
+    diagramSteps:["Claims Staked","Rumor Reaches Nation","Case File Opened"],
+    vocabPage:1,
+    vocab:[
+      {term:"Proponent", def:"The company that wants to build the project. In our story, that's the mining company."},
+      {term:"Trigger", def:"The rule that says a project is big enough (or the right type) that it needs a formal review."},
+      {term:"Decision-maker", def:"The person or group with the power to say yes, no, or 'yes, but only if...' to the project."},
+      {term:"Size Rule", def:"A rule in provincial or federal law that says how big a project must be before it needs a formal review — one common kind of trigger."}
+    ],
+    examples:[
+      "A highway company wants to build a new road near a different Nation's reserve. The highway company is the proponent. A <strong>size rule</strong> in provincial law is the trigger. A transportation minister is the decision-maker."
+    ],
+    stageQuestions:[
+      {q:"How do we find out if this rumor is even true?", a:"Check public mineral claims registries, contact the company directly, or ask the Ministry of Energy and Mines to confirm any staked claims."},
+      {q:"Do we have to respond right away?", a:"No. Nothing is legally required yet at this stage — but starting a case file early protects the Nation's position later."},
+      {q:"Who inside the Nation needs to know about this first?", a:"Usually Chief and Council, plus whoever holds the lands and resources portfolio — before any public statement is made."}
+    ],
+    assignment:{
+      instructions:"Open the case file. Just write one sentence for each:",
+      items:[
+        "One thing you already know about the Copper Ridge Project",
+        "One question you still have"
+      ],
+      modelResponse:"Example: \"I know the company wants to build an open-pit copper mine near Tsilaqw territory. I still wonder exactly how big the project is, and how close it is to our community.\"",
+      hint:"There's no wrong answer here. Even \"I don't know much yet\" is a fine place to start — that's exactly the point of this exercise.",
+      selfCheck:[
+        "Does what you wrote sound like something you'd actually say out loud, not something you think a textbook wants to hear?",
+        "Is your question something a real person could go find the answer to?"
+      ]
+    },
+    quiz:[
+      {q:"What is the primary purpose of an Impact Assessment?",opts:["To approve projects quickly","To evaluate the potential effects of a proposed project before it proceeds","To collect taxes from proponents","To replace Indigenous laws"],correct:1},
+      {q:"In IA terminology, who is the \"proponent\"?",opts:["The government regulator","The community affected by a project","The company or party proposing the project","An independent auditor"],correct:2},
+      {q:"What usually \"triggers\" a formal Impact Assessment?",opts:["A Nation's request","Meeting specific project-type or size thresholds set in law","Media coverage","A court order"],correct:1},
+      {q:"Why does Tsilaqw Nation start a case file so early, before any formal process begins?",opts:["It's required by federal law","To track decisions and evidence as the project moves through each stage","To sell information to the company","It's optional and has no real use"],correct:1},
+      {q:"Which best describes the role of a \"decision-maker\" in IA?",opts:["The person who approves, rejects, or conditions a project based on the assessment","The Nation's Chief only","The company's engineer","A courtroom judge"],correct:0}
+    ]
+  },
+  {
+    id:2,
+    title:"Early Engagement & Phase 0",
+    stage:"The letter",
+    fppl:"Learning involves recognizing the consequences of one's actions.",
+    pages:[
+      {
+        title:"Page 1 of 3 — The Letter",
+        paragraphs:[
+          "A letter arrives from the company. It says they want to \"start a conversation\" about the Copper Ridge Project.",
+          "No formal review has started. Nothing is official yet. This quiet moment — before any government process begins — has a name: <strong>Phase 0</strong>.",
+          "It would be easy to ignore a letter like this. But Tsilaqw Nation's IA coordinator knows: what happens now can shape everything that comes later."
+        ]
+      },
+      {
+        title:"Page 2 of 3 — Two Questions to Ask First",
+        paragraphs:[
+          "Before writing back, the Nation asks itself two questions — <strong>capacity</strong> and <strong>mandate</strong>. Look at the vocabulary bubbles to learn what each one means, along with the name for this whole quiet moment: Phase 0."
+        ]
+      },
+      {
+        title:"Page 3 of 3 — Engage Now, or Wait?",
+        paragraphs:[
+          "Once those two questions are answered, one decision remains: engage with the company now, while things are still flexible — or wait for a formal process to begin, when the rules are clearer.",
+          "There's no rush to decide, and no shame in choosing to wait. This kind of decision takes real thought. Good learning — like good decision-making — takes patience and time."
+        ]
+      }
+    ],
+    diagramSteps:["Company Letter","Readiness Check","Engage or Wait"],
+    vocab:[
+      {term:"Phase 0", def:"The quiet time before any official review begins — when a company first reaches out."},
+      {term:"Capacity", def:"Does the Nation have enough staff, time, and know-how to respond right now?"},
+      {term:"Mandate", def:"Does leadership actually want to engage on this, right now?"}
+    ],
+    examples:[
+      "A forestry company emails to \"introduce the project\" before any cutting permit is filed. That email is a Phase 0 moment, just like the mining company's letter."
+    ],
+    stageQuestions:[
+      {q:"How do we know if we have enough capacity to engage right now?", a:"Look honestly at current staff workload, and whether taking this on means dropping something else important."},
+      {q:"What if leadership hasn't given clear direction yet?", a:"That's a signal to pause and get a mandate from Chief and Council first, rather than responding informally on your own."},
+      {q:"What happens if we choose to wait?", a:"The Nation loses some ability to shape early terms, but keeps its options open until a formal, better-defined process begins."}
+    ],
+    assignment:{
+      instructions:"Make one decision for Tsilaqw Nation:",
+      items:[
+        "Write one sentence: should the Nation engage now, or wait? Say why."
+      ],
+      modelResponse:"Example: \"I think Tsilaqw Nation should engage now, because responding early means we can help shape how the company talks to us, instead of just reacting later.\"",
+      hint:"There's no wrong choice here — engage now and wait are both reasonable. What matters is having a reason.",
+      selfCheck:[
+        "Does your one sentence give an actual reason, not just a yes/no?",
+        "Would this reason make sense to someone who wasn't in this course?"
+      ]
+    },
+    quiz:[
+      {q:"What is \"Phase 0\" in Impact Assessment?",opts:["The final decision stage","The informal period before a formal IA process begins","A stage that only applies to federal projects","The public hearing stage"],correct:1},
+      {q:"Why is early engagement valuable for a Nation?",opts:["It has no effect on outcomes","It lets a Nation help shape the process before positions harden","It is legally required in all cases","It replaces the need for any further assessment"],correct:1},
+      {q:"Which is NOT typically part of a Phase 0 readiness check?",opts:["Assessing internal capacity","Confirming community mandate","Identifying information gaps","Issuing a final permit"],correct:3},
+      {q:"In the case study, what prompts Tsilaqw Nation's Phase 0 readiness exercise?",opts:["A federal designation notice","A letter from the company proposing to start a conversation","A court ruling","A newspaper article"],correct:1},
+      {q:"What decision do participants need to make at this stage?",opts:["Whether to sue the company","Whether to engage now or wait for a formal trigger","Whether to relocate the community","Whether to approve the mine"],correct:1}
+    ]
+  },
+  {
+    id:3,
+    title:"Major Project Assessment Standards",
+    stage:"Setting the bar",
+    fppl:"Learning involves generational roles and responsibilities.",
+    pages:[
+      {
+        title:"Page 1 of 3 — Pause Before You Answer",
+        paragraphs:[
+          "Before writing back to the company, Tsilaqw Nation stops and asks a bigger question first: what does OUR Nation need to see, before we'd ever say yes to a project like this?",
+          "This isn't about copying whatever rules the government will eventually use. It's about deciding, in the Nation's own words, what actually matters."
+        ]
+      },
+      {
+        title:"Page 2 of 3 — What is a Standard?",
+        paragraphs:[
+          "A <strong>standard</strong> is just a fancy word for \"our own rule.\" Look at the vocabulary bubbles for the two words that matter most on this page."
+        ]
+      },
+      {
+        title:"Page 3 of 3 — Built to Last",
+        paragraphs:[
+          "This standard isn't just for Copper Ridge. It's for every project that comes after it too.",
+          "That's why this matters so much: a good standard is something the Nation's children and grandchildren will still be using — not something built and thrown away after one project."
+        ]
+      }
+    ],
+    diagramSteps:["Nation's Priorities","Draft Criteria","Nation's Standard"],
+    vocab:[
+      {term:"Standard", def:"The Nation's own rule for judging whether a project is acceptable."},
+      {term:"Criteria", def:"The specific things the standard checks for — like \"no harm to salmon habitat.\""}
+    ],
+    examples:[
+      "A Nation reviewing a proposed hydro project might set a rule: zero harm to salmon spawning habitat. That rule came from the Nation, not from any government process."
+    ],
+    stageQuestions:[
+      {q:"Whose values do these criteria actually need to reflect?", a:"The community's — ideally gathered through leadership and, where possible, direct community input, not just one coordinator's own judgment."},
+      {q:"What if our criteria are stricter than what government requires?", a:"That's allowed. The Nation's standard doesn't need government's permission, and it can be stricter or simply different."},
+      {q:"How do we make sure this standard gets used again next time?", a:"Write it down clearly and keep it in the Nation's records, so it's ready before the next project shows up."}
+    ],
+    assignment:{
+      instructions:"Set one rule for Tsilaqw Nation:",
+      items:[
+        "Write ONE rule the Nation should use to judge Copper Ridge — and any future project."
+      ],
+      modelResponse:"Example: \"Any project must show it will not harm the creek that feeds our drinking water — no matter what government rules say.\"",
+      hint:"A good rule is specific enough that two different people would apply it the same way.",
+      selfCheck:[
+        "Could your rule apply to a totally different project, not just Copper Ridge?",
+        "Is it specific enough that someone else could actually check whether a project passes or fails it?"
+      ]
+    },
+    quiz:[
+      {q:"What is the purpose of a Nation's own Major Project Assessment Standard?",opts:["To copy the federal standard exactly","To give the Nation independent criteria for evaluating projects, regardless of government requirements","To limit the Nation's involvement in IA","It has no formal use"],correct:1},
+      {q:"Why build evaluation criteria BEFORE responding to the company?",opts:["It's faster","It ensures the Nation's priorities anchor the process rather than reacting to the proponent's terms","It's required by the company","There's no strategic reason"],correct:1},
+      {q:"A Major Project Assessment Standard is best described as:",opts:["A government-issued regulation","A Nation-driven benchmark for assessing projects","A federal court precedent","An insurance requirement"],correct:1},
+      {q:"What does this stage of the case study ask participants to produce?",opts:["A permit application","Draft evaluation criteria for the Copper Ridge project","A press release","A mining engineering report"],correct:1},
+      {q:"Independent evaluation criteria matter most because they:",opts:["Guarantee project rejection","Give the Nation a consistent standard that doesn't shift project to project","Are required to get funding","Replace the need for cultural knowledge"],correct:1}
+    ]
+  },
+  {
+    id:4,
+    title:"Federal Impact Assessment",
+    stage:"The project is designated",
+    fppl:"Learning is holistic, reflexive, reflective, experiential, and relational.",
+    pages:[
+      {
+        title:"Page 1 of 4 — The Project Gets a Label",
+        paragraphs:[
+          "Quick primer: in Canada, more than one government can have authority — or <strong>jurisdiction</strong> — over the same project. <strong>Federal</strong> jurisdiction is Canada's national government. <strong>Provincial</strong> jurisdiction (sometimes called \"jurisdictional\" in this course) is the government of the province — in this story, British Columbia. A Nation can also lead its own review under its own jurisdiction, which we'll get to in Module 6. This module is about the federal side only.",
+          "Copper Ridge is big enough that it crosses a line in federal law. That line has a name: <strong>designation</strong>.",
+          "Once a project is designated, a formal federal review begins. This is no longer a rumor or a letter — it's now an official process, with real deadlines."
+        ]
+      },
+      {
+        title:"Page 2 of 4 — Four Steps",
+        paragraphs:[
+          "The federal process itself moves through four steps, one after another. Look at the vocabulary bubbles to learn what each one means.",
+          "Two more words are worth knowing too — <strong>leverage</strong> and <strong>consultative</strong>. These aren't extra steps; they describe how much your input actually matters at each of the four steps."
+        ]
+      },
+      {
+        title:"Page 3 of 4 — Two Kinds of Involvement",
+        paragraphs:[
+          "Not every moment in this process matters the same amount. Some moments are just \"tell us what you think\" — your voice is heard, but it might not change anything. Other moments actually shape what happens next.",
+          "Knowing the difference helps the Nation spend its time and energy where it counts most."
+        ]
+      },
+      {
+        title:"Page 4 of 4 — Where to Focus",
+        paragraphs:[
+          "Tsilaqw Nation's coordinator draws a simple map of the whole four-step process and marks where the Nation should show up loudest.",
+          "This is what it means for learning to be relational: no single step tells the whole story. You have to see how all four steps connect before you know where to put your energy."
+        ]
+      }
+    ],
+    diagramSteps:["Planning Phase","Impact Statement","Assessment","Decision"],
+    vocab:[
+      {term:"Planning Phase", def:"The first step — deciding what will be studied and how."},
+      {term:"Impact Statement", def:"The company's own evidence about what the project will do."},
+      {term:"Assessment Phase", def:"Government checks the evidence, including what the Nation knows."},
+      {term:"Decision", def:"The final call — approve, reject, or approve with conditions."},
+      {term:"Leverage", def:"A moment where the Nation's input can actually change what happens."},
+      {term:"Consultative", def:"A moment where the Nation is asked for input, but it may not change the outcome."}
+    ],
+    examples:[
+      "A proposed LNG export terminal goes through the exact same four steps — planning, impact statement, assessment, decision — even though it looks nothing like a copper mine."
+    ],
+    stageQuestions:[
+      {q:"Which stage should we watch most closely?", a:"The Planning Phase — that's where the scope of the whole review gets locked in, so it carries the most leverage."},
+      {q:"What if we miss an early deadline?", a:"It's harder, but not always impossible, to raise an issue later. Early input just carries more weight."},
+      {q:"Do we need a lawyer for this?", a:"Not necessarily for every submission, but legal advice is worth getting before any major deadline, especially around rights and title."}
+    ],
+    assignment:{
+      instructions:"Find one high-leverage moment:",
+      items:[
+        "Pick ONE of the four steps. Write one sentence about why the Nation should pay close attention there."
+      ],
+      modelResponse:"Example: \"I'd focus on the Planning Phase, because that's where the government decides what will even be studied — if something important gets left out here, it's hard to add back in later.\"",
+      hint:"Leverage tends to be strongest early — in planning — more than at the very end.",
+      selfCheck:[
+        "Did you pick one specific step, not \"the whole process\"?",
+        "Does your reason explain WHY that step matters, not just that it does?"
+      ]
+    },
+    quiz:[
+      {q:"Which best describes the general flow of a federal Impact Assessment?",opts:["Decision, then planning, then impact statement","Planning phase, impact statement, assessment, decision","Only one continuous hearing","There is no defined process"],correct:1},
+      {q:"Where does Indigenous involvement carry the most real leverage in the federal process?",opts:["Only after the decision is made","Points where scope, information requirements, and conditions are still being shaped","Nowhere","Only in media coverage"],correct:1},
+      {q:"What triggers Copper Ridge's federal IA in the case study?",opts:["A community petition","The project being designated under federal law","A court injunction","The company's annual report"],correct:1},
+      {q:"A key task at this stage is to:",opts:["Ignore the federal process","Identify submission points relevant to the Nation across the federal timeline","Approve the project immediately","Cancel the case file"],correct:1},
+      {q:"\"Consultative\" involvement, as discussed in this module, means:",opts:["Formal decision-making power","Being asked for input without necessarily shaping the outcome","Owning the project","Vetoing any project outright"],correct:1}
+    ]
+  },
+  {
+    id:5,
+    title:"Jurisdictional (BC) Impact Assessment",
+    stage:"Parallel provincial process",
+    fppl:"Learning involves patience and time.",
+    pages:[
+      {
+        title:"Page 1 of 3 — Two Reviews at Once",
+        paragraphs:[
+          "Copper Ridge doesn't just trigger a federal review. It's also big enough to trigger a separate BC review.",
+          "Now there are two processes running side by side — each with its own timeline, its own paperwork, and its own decision-maker. Here's roughly what each one tends to focus on:",
+          "<div class=\"compare-table\"><div class=\"compare-col\"><div class=\"compare-head\">Federal Review</div><ul><li>Effects crossing provincial or international lines</li><li>Federal lands and fisheries</li><li>Migratory birds, greenhouse gas emissions</li><li>Impacts on rights protected under federal law</li></ul></div><div class=\"compare-col\"><div class=\"compare-head\">Provincial (BC) Review</div><ul><li>Provincial environmental effects</li><li>Heritage and archaeological resources</li><li>Provincial economic effects</li><li>Land and water under provincial jurisdiction</li></ul></div></div>"
+        ]
+      },
+      {
+        title:"Page 2 of 3 — Same Evidence, Two Doors",
+        paragraphs:[
+          "Sometimes the exact same piece of evidence could be used for both reviews. Sometimes the two reviews want completely different things, on completely different timelines.",
+          "Look at the vocabulary bubbles for the words that describe each situation."
+        ]
+      },
+      {
+        title:"Page 3 of 3 — Comparing Takes Patience",
+        paragraphs:[
+          "It would be faster to just deal with each review separately, one at a time. But comparing them carefully — side by side — takes real patience.",
+          "That patience pays off: the Nation avoids doing the same work twice, and catches problems before they become a crisis."
+        ]
+      }
+    ],
+    diagramSteps:["Federal Process","BC Process","Compare & Sequence"],
+    vocab:[
+      {term:"Overlap", def:"When the same evidence could satisfy both the federal and BC reviews."},
+      {term:"Conflict", def:"When the two reviews want different things, on different timelines."},
+      {term:"Harmonization", def:"Lining up the two reviews on purpose, so less work gets duplicated."}
+    ],
+    examples:[
+      "A proposed transmission line triggers a federal review because it crosses a waterway, and a BC review because of its size. Same overlap-and-conflict comparison applies."
+    ],
+    stageQuestions:[
+      {q:"Do we have to prepare separate evidence for each review?", a:"Not always. If overlap is identified early, the same evidence can sometimes serve both reviews."},
+      {q:"What if the two processes want conflicting things?", a:"Flag the conflict early to both reviewing bodies — sometimes timelines or requirements can be adjusted once it's raised."},
+      {q:"Is there a way to formally link the two reviews?", a:"Yes — ask about harmonization or substitution agreements between the federal and provincial agencies."}
+    ],
+    assignment:{
+      instructions:"Spot one overlap:",
+      items:[
+        "Name ONE piece of evidence that could count for both the federal and BC reviews."
+      ],
+      modelResponse:"Example: \"A water-quality study of the creek near the mine site could probably be used for both the federal review and the BC review — they'd both want to see that information.\"",
+      hint:"Think about what kind of evidence a company would have to collect anyway, for either process.",
+      selfCheck:[
+        "Is your example a real, specific piece of evidence — not just \"environmental information\" in general?",
+        "Could you explain in one sentence why both reviews would want this same evidence?"
+      ]
+    },
+    quiz:[
+      {q:"Why might a project face both a federal and a provincial assessment?",opts:["It's a clerical error","Different triggers and jurisdictions can apply to the same project","Only one process is ever used","Provinces never assess major projects"],correct:1},
+      {q:"What is a key reason to compare federal and BC processes side by side?",opts:["To find strategic sequencing where requirements overlap or conflict","To pick whichever is shorter and ignore the other","There's no benefit","To avoid engaging with either"],correct:0},
+      {q:"In the case study, what does the BC process introduce alongside the federal one?",opts:["A duplicate decision with no differences","A parallel provincial environmental assessment with its own requirements","A ban on the mine","A private lawsuit"],correct:1},
+      {q:"This stage's task asks participants to:",opts:["Ignore jurisdictional overlap","Build a comparison table of the federal and BC processes for Copper Ridge","File a lawsuit","Draft a permit"],correct:1},
+      {q:"Harmonizing overlapping federal/provincial requirements primarily helps to:",opts:["Increase paperwork for its own sake","Reduce duplication and align timelines and evidence across processes","Guarantee project approval","Remove Indigenous involvement"],correct:1}
+    ]
+  },
+  {
+    id:6,
+    title:"Indigenous-led Assessment",
+    stage:"Taking the wheel",
+    fppl:"Learning recognizes the role of Indigenous knowledge.",
+    pages:[
+      {
+        title:"Page 1 of 3 — Something's Still Missing",
+        paragraphs:[
+          "The federal review is underway. The BC review is underway. But Tsilaqw Nation notices something: some things that matter most to the community aren't being looked at by either one.",
+          "So the Nation decides to run its own review — an <strong>Indigenous-led assessment</strong> — alongside the other two."
+        ]
+      },
+      {
+        title:"Page 2 of 3 — Not a Comment. A Real Review.",
+        paragraphs:[
+          "This isn't a letter sent into someone else's process. It's the Nation's own review, using the Nation's own laws and knowledge, standing on its own.",
+          "FNMPC and Firelight publish a real guide on exactly this — <strong>An Introduction to Indigenous-Led Assessment: Key Considerations and Principles</strong> (linked in the sidebar). It walks through readiness, scope, and different ways a Nation can structure its own review, from fully independent to working alongside government processes.",
+          "Look at the vocabulary bubble for the one word that makes a review like this actually work."
+        ]
+      },
+      {
+        title:"Page 3 of 3 — Centering Our Own Knowledge",
+        paragraphs:[
+          "The federal and BC reviews were never built to fully understand what Tsilaqw Nation knows about this land. An Indigenous-led assessment fixes that — not by replacing the other two reviews, but by adding what only the Nation can bring."
+        ]
+      }
+    ],
+    diagramSteps:["Identify Gaps","Scope Assessment","Nation-Led Review"],
+    vocab:[
+      {term:"Scope", def:"Deciding exactly what your own review will look at, who does it, and by when."}
+    ],
+    examples:[
+      "A Nation worried a federal dam review won't look closely enough at a traditional fishing site might build its own review focused just on that fishery."
+    ],
+    stageQuestions:[
+      {q:"Do we need permission from government to run our own assessment?", a:"No. An Indigenous-led assessment stands on the Nation's own authority and doesn't require government approval to proceed."},
+      {q:"Who should conduct our review?", a:"Whoever the Nation trusts and mandates — internal staff, hired consultants, or a mix, guided by the Nation's own standards."},
+      {q:"What if our review finds something the other two missed?", a:"Document it clearly. That's exactly the gap an Indigenous-led assessment is meant to catch."}
+    ],
+    assignment:{
+      instructions:"Name what our review should cover:",
+      items:[
+        "Write ONE thing Tsilaqw Nation's own review should look at that the federal and BC reviews might miss."
+      ],
+      modelResponse:"Example: \"Our own review should look at how the mine's dust and noise would affect a nearby gathering site used for harvesting plants — something the federal and BC reviews probably won't ask about in detail.\"",
+      hint:"Think about what only Tsilaqw Nation would know to ask about.",
+      selfCheck:[
+        "Is what you named something specific to this land or community, not something already covered by the federal or BC review stages?",
+        "Could you explain in one sentence why the other reviews might miss it?"
+      ]
+    },
+    quiz:[
+      {q:"An Indigenous-led assessment is best described as:",opts:["A parallel process designed and run by the Nation itself, with its own standing","A summary document with no independent standing","A subset of the federal process","A public opinion poll"],correct:0},
+      {q:"Why might Tsilaqw Nation launch its own assessment alongside federal/provincial ones?",opts:["To duplicate effort with no purpose","Because gaps in the other processes leave issues unaddressed","It's mandatory under all circumstances","To delay the mine indefinitely"],correct:1},
+      {q:"What foundational step does this stage ask participants to complete?",opts:["Filing a federal appeal","Designing the scope of the Nation-led assessment","Approving the mine","Writing a company press release"],correct:1},
+      {q:"A well-scoped Indigenous-led assessment typically defines:",opts:["Nothing specific","What will be assessed, by whom, and against what standards","Only the budget","The company's marketing plan"],correct:1},
+      {q:"Indigenous-led assessment complements government processes by:",opts:["Replacing them entirely in all cases","Centering the Nation's own knowledge, priorities, and standards","Eliminating the need for any further review","Guaranteeing a specific outcome"],correct:1}
+    ]
+  },
+  {
+    id:7,
+    title:"Cultural Rights Assessment",
+    stage:"The heart of the matter",
+    fppl:"Learning ultimately supports the well-being of the self, family, community, land, spirits, and ancestors — and some knowledge is sacred, shared only with permission.",
+    pages:[
+      {
+        title:"Page 1 of 3 — What the Mine Would Touch",
+        paragraphs:[
+          "There's a sacred site inside the boundary of the proposed pit. None of the last six reviews were built to fully understand what that site means.",
+          "This is where a <strong>Cultural Rights Assessment</strong> becomes necessary — not as an afterthought, but as the heart of the whole case."
+        ]
+      },
+      {
+        title:"Page 2 of 3 — What Gets Protected",
+        paragraphs:[
+          "A Cultural Rights Assessment looks at what environmental studies usually miss: spiritual and cultural practices, sacred sites, and the rights connected to them.",
+          "FNMPC publishes a real toolkit for this — <strong>Spirit of the Land</strong>, with both a Primer and a full Implementation Guide (linked in the sidebar). It's built specifically to help a Nation document cultural and spiritual significance in its own words, on its own terms.",
+          "Look at the vocabulary bubble for the tool this course uses to talk about this kind of review."
+        ]
+      },
+      {
+        title:"Page 3 of 3 — Bringing It All Together",
+        paragraphs:[
+          "This module comes last on purpose. Everything from Modules 1 through 6 — what the Nation knew, its own standard, the federal and BC submissions, the Nation's own review — all feed into this one final, complete picture.",
+          "Some knowledge is sacred, and only shared with permission. That's exactly why this course uses a made-up site and a made-up Nation — so no real community's protected knowledge is ever needed to learn this material."
+        ]
+      }
+    ],
+    diagramSteps:["Sacred Site Found","Cultural Assessment","Case File Complete"],
+    vocab:[
+      {term:"Cultural Rights Assessment", def:"A review of a project's impact on cultural and spiritual practices, sites, and rights."},
+      {term:"Sacred", def:"Protected and meaningful — sometimes only shared with permission, or in certain situations."}
+    ],
+    examples:[
+      "A proposed transmission corridor crossing a traditional gathering site would call for this same kind of assessment — even though clearing a corridor looks nothing like an open-pit mine."
+    ],
+    stageQuestions:[
+      {q:"Do we have to share every detail about the site?", a:"No. The Nation decides what to share and what stays protected. Some knowledge can stay private even in a formal assessment."},
+      {q:"What if the company says the impact is \"minor\"?", a:"The Nation's own assessment defines what counts as significant. That judgment doesn't belong to the proponent."},
+      {q:"Can the project still go ahead if there's a real impact here?", a:"Only with real protections or alternatives in place — this part of the case file is where the Nation sets that condition."}
+    ],
+    assignment:{
+      instructions:"Write the final case file entry:",
+      items:[
+        "List an example of a cultural site or area of significance that could be missed by standard provincial or federal assessments."
+      ],
+      modelResponse:"Example: \"A gathering site used for harvesting medicinal plants — it wouldn't show up in a standard environmental review, but it holds real cultural and spiritual significance for the Nation.\"",
+      hint:"You don't need to explain everything about the site — one honest, clear example is enough.",
+      selfCheck:[
+        "Does your example describe the site's importance on its own terms, not just as \"an obstacle to the mine\"?",
+        "Would this example make sense to someone who has never heard of Copper Ridge?"
+      ]
+    },
+    quiz:[
+      {q:"What is the primary purpose of a Cultural Rights Assessment?",opts:["To assess the physical engineering of a project","To document and evaluate impacts to cultural and spiritual practices, sites, and rights","To calculate tax revenue","To approve construction permits"],correct:1},
+      {q:"In the case study, what specific issue drives this stage of the story?",opts:["A wage dispute","A sacred site located inside the proposed pit boundary","A zoning disagreement","A shipping route conflict"],correct:1},
+      {q:"Tools like the \"Spirit of the Land\" approach are designed to:",opts:["Replace environmental science entirely","Capture cultural and spiritual impacts that other assessment types may miss","Set mining engineering standards","Calculate market prices for copper"],correct:1},
+      {q:"This stage asks participants to:",opts:["Ignore the sacred site","Complete a cultural rights assessment summary defending the site's significance","Approve the pit design","Draft a shareholder report"],correct:1},
+      {q:"Why does the case study place Cultural Rights Assessment last, after the other six modules?",opts:["It's the least important step","It builds on and can surface issues the earlier processes didn't fully capture","It's unrelated to the rest of the case","Order has no significance"],correct:1}
+    ]
+  }
+];
+
+const FINAL_EXAM = {
+  id:'final',
+  title:"Final Certification",
+  stage:"Course completion",
+  fppl:"All nine First Peoples Principles of Learning, together.",
+  content:[
+    "The Copper Ridge case file is complete: Tsilaqw Nation has moved from first rumor through Phase 0 readiness, its own Major Project Assessment Standard, a federal review, a parallel BC review, its own Indigenous-led assessment, and finally a Cultural Rights Assessment of the sacred site inside the pit boundary.",
+    "This final exam draws questions from all seven modules to confirm the full sequence holds together as one coherent case, not seven disconnected topics. It mirrors the kind of cumulative check a real IA coordinator would want before calling a case file complete.",
+    "As with every module test, this exam is <strong>repeatable</strong> and requires <strong>80% correct</strong> to pass. There is no penalty for retaking it — the goal is mastery of the full sequence, not a single attempt."
+  ],
+  diagramSteps:["7 Modules","One Case File","Certification"],
+  vocab:MODULES.reduce((all,m) => all.concat(m.vocab||[]), []),
+  quiz:[
+    {q:"In the case study, what event starts Tsilaqw Nation's case file even before any formal process begins?",opts:["The federal designation notice","The company's letter proposing to start a conversation","The BC environmental assessment order","The cultural rights assessment"],correct:1},
+    {q:"What are the three components of a Phase 0 readiness check?",opts:["Budget, marketing, legal","Capacity, mandate, information gaps","Engineering, geology, finance","Permits, taxes, insurance"],correct:1},
+    {q:"Why does the Nation build its own Major Project Assessment Standard before responding to the company?",opts:["To copy government criteria exactly","To anchor evaluation in the Nation's own priorities rather than reacting to the proponent's terms","Because it's legally mandated","To delay the process"],correct:1},
+    {q:"What event formally triggers the federal Impact Assessment for Copper Ridge?",opts:["A community vote","The project being designated under federal law","A provincial court order","Media pressure"],correct:1},
+    {q:"Where does Indigenous involvement typically carry the most leverage in the federal IA process?",opts:["After the final decision","Early scoping and planning stages","In media interviews","Nowhere"],correct:1},
+    {q:"Why does Copper Ridge face both a federal and a BC environmental assessment?",opts:["Administrative error","Different triggers and jurisdictions can both apply to the same project","Only one process is ever legally valid","BC has no assessment law"],correct:1},
+    {q:"What is the main value of comparing the federal and BC processes side by side?",opts:["To duplicate paperwork","To find strategic sequencing where requirements overlap or conflict","To ignore one of them entirely","There is no value"],correct:1},
+    {q:"What prompts Tsilaqw Nation to launch its own Indigenous-led assessment?",opts:["A legal requirement in all cases","Gaps in the federal and provincial processes that leave issues unaddressed","A directive from the mining company","A federal court order"],correct:1},
+    {q:"What is the foundational first step in building an Indigenous-led assessment?",opts:["Filing a lawsuit","Scoping — defining what will be assessed, by whom, and against what standards","Approving the mine","Hiring the company's engineers"],correct:1},
+    {q:"What issue specifically drives the need for a Cultural Rights Assessment in the case study?",opts:["A wage dispute with the company","A sacred site located inside the proposed pit boundary","A shipping route disagreement","A zoning appeal"],correct:1},
+    {q:"Why is the Cultural Rights Assessment placed as the final module in the case study sequence?",opts:["It's the least significant step","It draws on and can surface impacts the earlier processes didn't fully capture","It has no connection to the rest of the case","Module order is arbitrary"],correct:1},
+    {q:"Throughout the course, what does Tsilaqw Nation's IA coordinator build to track decisions and evidence at every stage?",opts:["A press kit","A running case file","A shareholder report","A mining permit"],correct:1},
+    {q:"Which best distinguishes \"consultative\" involvement from involvement with real leverage in an IA process?",opts:["There is no difference","Consultative involvement means being asked for input without necessarily shaping the outcome, while leverage points can constrain what follows","Consultative involvement always has veto power","Leverage only exists at the final decision"],correct:1},
+    {q:"Across the full case study, what is the overall relationship between the federal, provincial, Indigenous-led, and cultural rights processes?",opts:["They are identical processes run four times","They are distinct but related processes that, together, build a complete picture the Nation can act on","Only the federal process matters","They cancel each other out"],correct:1}
+  ]
+};
+
+const PASS_THRESHOLD = 0.8;
+
+function isFinalExamPassed(){
+  const fqs = state.quizState['final'];
+  return !!(fqs && fqs.submitted && (fqs.score / fqs.total) >= PASS_THRESHOLD);
+}
+let state = {
+  activeModule: 1,
+  activeTab: 'learn',
+  quizState: {} // moduleId -> {answers:{}, submitted:bool, score:n, total:n}
+};
+
+MODULES.forEach(m => { state.quizState[m.id] = {answers:{}, submitted:false}; });
+state.quizState[FINAL_EXAM.id] = {answers:{}, submitted:false};
+state.selfCheckRevealed = {};
+state.modelRevealed = {};
+state.learnPage = {};
+state.stageQARevealed = {};
+
+function toggleStageQA(moduleId){
+  state.stageQARevealed[moduleId] = !state.stageQARevealed[moduleId];
+  render();
+}
+
+function downloadCertificate(){
+  const nameInput = document.getElementById('certName');
+  const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Course Participant';
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 1600;
+  canvas.height = 1131;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#f7f1e1';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Outer border
+  ctx.strokeStyle = '#94551f';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+
+  // Inner border
+  ctx.strokeStyle = '#c17a3f';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(64, 64, canvas.width - 128, canvas.height - 128);
+
+  ctx.textAlign = 'center';
+
+  // Eyebrow
+  ctx.fillStyle = '#94551f';
+  ctx.font = '600 22px "Inter", sans-serif';
+  ctx.fillText('COPPER RIDGE PROJECT  ·  IMPACT ASSESSMENT COURSE', canvas.width/2, 175);
+
+  // Title
+  ctx.fillStyle = '#2b2820';
+  ctx.font = '700 58px "Oswald", sans-serif';
+  ctx.fillText('Certificate of Completion', canvas.width/2, 270);
+
+  // Subtitle
+  ctx.fillStyle = '#453f30';
+  ctx.font = 'italic 26px "Inter", sans-serif';
+  ctx.fillText('This certifies that', canvas.width/2, 400);
+
+  // Name
+  ctx.fillStyle = '#94551f';
+  ctx.font = '700 52px "Oswald", sans-serif';
+  ctx.fillText(name, canvas.width/2, 480);
+
+  // Underline beneath name
+  const nameWidth = ctx.measureText(name).width;
+  ctx.strokeStyle = '#c17a3f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2 - Math.max(nameWidth/2, 220), 510);
+  ctx.lineTo(canvas.width/2 + Math.max(nameWidth/2, 220), 510);
+  ctx.stroke();
+
+  // Body text
+  ctx.fillStyle = '#453f30';
+  ctx.font = '24px "Inter", sans-serif';
+  ctx.fillText('has successfully completed the Copper Ridge Project Impact Assessment Case Study,', canvas.width/2, 580);
+  ctx.fillText('covering all seven modules and the Final Certification exam', canvas.width/2, 615);
+  ctx.fillText('at 80% or higher, from introduction through cultural rights assessment.', canvas.width/2, 650);
+
+  // Date
+  const dateStr = new Date().toLocaleDateString('en-CA', { year:'numeric', month:'long', day:'numeric' });
+  ctx.fillStyle = '#6b6350';
+  ctx.font = '20px "Inter", sans-serif';
+  ctx.fillText('Date completed: ' + dateStr, canvas.width/2, 740);
+
+  // Stamp-style seal
+  ctx.save();
+  ctx.translate(canvas.width/2, 870);
+  ctx.rotate(-0.08);
+  ctx.strokeStyle = '#3f6b45';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0, 0, 70, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.fillStyle = '#3f6b45';
+  ctx.font = '700 20px "Inter", sans-serif';
+  ctx.fillText('PASSED', 0, -4);
+  ctx.font = '600 13px "Inter", sans-serif';
+  ctx.fillText('80%+', 0, 18);
+  ctx.restore();
+
+  // Footer
+  ctx.fillStyle = '#6b6350';
+  ctx.font = '16px "Inter", sans-serif';
+  ctx.fillText('Tsilaqw Nation · Copper Ridge Project Case Study · First Nations Major Projects Coalition', canvas.width/2, canvas.height - 90);
+
+  canvas.toBlob(function(blob){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = name.replace(/[^a-z0-9]+/gi, '_');
+    a.download = 'Certificate_of_Completion_' + safeName + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+function downloadCaseFileTemplate(){
+  let text = "COMPLETE CASE FILE TEMPLATE\n";
+  text += "Adapt for a project coming your way\n";
+  text += "=".repeat(50) + "\n\n";
+  CASE_FILE_TEMPLATE.forEach((section, i) => {
+    text += section.heading + "\n";
+    text += "-".repeat(section.heading.length) + "\n";
+    section.prompts.forEach(p => { text += "  • " + p + "\n"; });
+    const ta = document.getElementById("template-ta-" + i);
+    const notes = (ta && ta.value.trim()) ? ta.value.trim() : "(no notes yet)";
+    text += "\nNotes:\n" + notes + "\n\n\n";
+  });
+  const blob = new Blob([text], {type: "text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Case_File_Template.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function getItem(id){
+  if(id === 'final') return FINAL_EXAM;
+  return MODULES.find(m=>m.id===id);
+}
+
+function toggleSelfCheck(moduleId){
+  state.selfCheckRevealed[moduleId] = !state.selfCheckRevealed[moduleId];
+  render();
+}
+
+function toggleModelResponse(moduleId){
+  state.modelRevealed[moduleId] = !state.modelRevealed[moduleId];
+  render();
+}
+
+function goToPage(moduleId, pageIndex){
+  state.learnPage[moduleId] = pageIndex;
+  render();
+}
+
+function flowDiagram(steps){
+  const boxW = 168, boxH = 64, gap = 44, top = 12;
+  const totalW = steps.length*boxW + (steps.length-1)*gap;
+  const totalH = boxH + top*2;
+  let svg = `<svg viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" role="img">
+    <title>${steps.join(' \u2192 ')}</title>`;
+  steps.forEach((label, i) => {
+    const x = i*(boxW+gap);
+    svg += `
+      <rect x="${x}" y="${top}" width="${boxW}" height="${boxH}" rx="8" fill="var(--paper-card)" stroke="var(--copper-deep)" stroke-width="1.5"/>
+      <foreignObject x="${x+8}" y="${top}" width="${boxW-16}" height="${boxH}">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Inter,sans-serif;font-size:12.5px;color:var(--ink);line-height:1.3;padding:4px;box-sizing:border-box;">${label}</div>
+      </foreignObject>`;
+    if(i < steps.length-1){
+      const ax = x+boxW;
+      const midY = top + boxH/2;
+      svg += `
+        <line x1="${ax+4}" y1="${midY}" x2="${ax+gap-10}" y2="${midY}" stroke="var(--copper-deep)" stroke-width="2"/>
+        <polygon points="${ax+gap-10},${midY-6} ${ax+gap-2},${midY} ${ax+gap-10},${midY+6}" fill="var(--copper-deep)"/>`;
+    }
+  });
+  svg += `</svg>`;
+  return svg;
+}
+
+function renderSidebar(){
+  const sb = document.getElementById('sidebar');
+  let html = `
+    <div class="brand">
+      <h1>Copper Ridge Project</h1>
+      <div class="sub">Impact Assessment Case Study · Tsilaqw Nation</div>
+    </div>
+  `;
+  MODULES.forEach(m => {
+    const qs = state.quizState[m.id];
+    const passed = qs.submitted && (qs.score/qs.total) >= PASS_THRESHOLD;
+    const failed = qs.submitted && !passed;
+    let status = '';
+    if(passed) status = '<span class="nav-status" style="color:var(--pass);">✓</span>';
+    else if(failed) status = '<span class="nav-status" style="color:var(--fail);">✕</span>';
+    html += `
+      <div class="nav-item ${state.activeModule===m.id?'active':''}" onclick="selectModule(${m.id})">
+        <div class="nav-num">${String(m.id).padStart(2,'0')}</div>
+        <div style="flex:1;">
+          <div class="nav-label">${m.title}</div>
+          <div class="nav-stage">${m.stage}</div>
+        </div>
+        ${status}
+      </div>
+    `;
+  });
+
+  const fqs = state.quizState[FINAL_EXAM.id];
+  const fPassed = fqs.submitted && (fqs.score/fqs.total) >= PASS_THRESHOLD;
+  const fFailed = fqs.submitted && !fPassed;
+  let fStatus = '';
+  if(fPassed) fStatus = '<span class="nav-status" style="color:var(--pass);">✓</span>';
+  else if(fFailed) fStatus = '<span class="nav-status" style="color:var(--fail);">✕</span>';
+  html += `
+    <div class="final-item">
+      <div class="nav-item ${state.activeModule==='final'?'active':''}" onclick="selectModule('final')">
+        <div class="nav-num" style="color:var(--copper-bright);">★</div>
+        <div style="flex:1;">
+          <div class="nav-label">${FINAL_EXAM.title}</div>
+          <div class="nav-stage">${FINAL_EXAM.stage}</div>
+        </div>
+        ${fStatus}
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="resource-links">
+      <div class="resource-links-label">FNMPC Resources</div>
+      ${FNMPC_RESOURCES.map(r => `
+        <a href="${r.url}" target="_blank" rel="noopener" class="resource-link">${r.label}</a>
+      `).join('')}
+    </div>
+  `;
+
+  sb.innerHTML = html;
+}
+
+function selectModule(id){
+  state.activeModule = id;
+  state.activeTab = 'learn';
+  render();
+}
+
+function selectTab(tab){
+  state.activeTab = tab;
+  render();
+}
+
+function selectAnswer(moduleId, qIndex, optIndex){
+  state.quizState[moduleId].answers[qIndex] = optIndex;
+  render();
+}
+
+function submitQuiz(moduleId){
+  const mod = getItem(moduleId);
+  const qs = state.quizState[moduleId];
+  let score = 0;
+  mod.quiz.forEach((q,i) => { if(qs.answers[i] === q.correct) score++; });
+  qs.submitted = true;
+  qs.score = score;
+  qs.total = mod.quiz.length;
+  render();
+}
+
+function retakeQuiz(moduleId){
+  state.quizState[moduleId] = {answers:{}, submitted:false};
+  render();
+}
+
+function renderMain(){
+  const m = getItem(state.activeModule);
+  const isFinal = m.id === 'final';
+  const qs = state.quizState[m.id];
+  const allAnswered = m.quiz.every((q,i)=> qs.answers[i] !== undefined);
+
+  const idLiteral = (typeof m.id === 'string') ? `'${m.id}'` : m.id;
+  let quizBody = '';
+  m.quiz.forEach((q,i) => {
+    let optsHtml = '';
+    q.opts.forEach((opt, oi) => {
+      const checked = qs.answers[i] === oi ? 'checked' : '';
+      const disabled = qs.submitted ? 'disabled' : '';
+      let optColor = '';
+      if(qs.submitted){
+        if(oi === q.correct) optColor = 'style="color:var(--pass);"';
+        else if(qs.answers[i] === oi && oi !== q.correct) optColor = 'style="color:var(--fail); text-decoration:line-through;"';
+      }
+      optsHtml += `
+        <div class="option">
+          <input type="radio" name="q${i}" id="q${i}o${oi}" ${checked} ${disabled} onchange="selectAnswer(${idLiteral},${i},${oi})">
+          <label for="q${i}o${oi}" ${optColor}>${opt}</label>
+        </div>
+      `;
+    });
+    quizBody += `
+      <div class="quiz-q">
+        <div class="qnum">Question ${i+1} of ${m.quiz.length}</div>
+        <div class="qtext">${q.q}</div>
+        ${optsHtml}
+      </div>
+    `;
+  });
+
+  let resultHtml = '';
+  if(qs.submitted){
+    const pct = Math.round((qs.score/qs.total)*100);
+    const passed = (qs.score/qs.total) >= PASS_THRESHOLD;
+    resultHtml = `
+      <div class="result-banner ${passed?'pass':'fail'}">
+        <div class="stamp ${passed?'pass':'fail'}">${passed?'PASSED':'NOT YET PASSED'}</div>
+        <div class="result-text">
+          <div class="score">${qs.score} / ${qs.total} correct (${pct}%)</div>
+          <div class="detail">${passed ? 'Meets the 80% threshold — this module is complete.' : 'Below the 80% threshold required to pass. Review the module content and retake when ready.'}</div>
+        </div>
+      </div>
+    `;
+    if(isFinal && passed){
+      resultHtml += `
+        <div class="assignment-box" style="margin-top:20px;">
+          <div class="label">Certificate of Completion</div>
+          <p style="font-size:14px; color:var(--ink-soft); margin-bottom:14px;">Enter the name to appear on your certificate, then download it as an image you can keep, print, or share.</p>
+          <input type="text" id="certName" placeholder="Your full name" style="width:100%; padding:11px 14px; border:1px solid var(--line-light); border-radius:5px; background:#fffdf7; color:var(--ink); font-family:'Inter',sans-serif; font-size:14px; margin-bottom:14px;">
+          <button class="primary" onclick="downloadCertificate()">Download Certificate</button>
+        </div>
+      `;
+    }
+  }
+
+  const progressDots = m.quiz.map((q,i) => {
+    if(!qs.submitted) return '<div class="progress-dot"></div>';
+    return qs.answers[i] === q.correct ? '<div class="progress-dot done"></div>' : '<div class="progress-dot failed"></div>';
+  }).join('');
+
+  // Learn content: paginated (m.pages) or legacy flat (m.content)
+  const stageTagText = isFinal ? `Course Completion — ${m.stage}` : `Module ${String(m.id).padStart(2,'0')} — ${m.stage}`;
+  const testTabLabel = isFinal ? 'Final Exam' : 'Knowledge Check';
+  const submitLabel = isFinal ? 'Submit Final Exam' : 'Submit Knowledge Check';
+  const retakeLabel = isFinal ? 'Retake Final Exam' : 'Retake Knowledge Check';
+  const moduleIdForJs = isFinal ? "'final'" : m.id;
+  let learnBodyHtml = '';
+  const inlineVocabHtml = (m.vocab && m.vocab.length) ? `
+    <div class="vocab-inline-wrap">
+      ${m.vocab.map(v => `
+        <div class="vocab-bubble-inline">
+          <div class="term">${v.term}</div>
+          <div class="def">${v.def}</div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+  let lastPageExtrasHtml = '';
+  if(m.fppl){
+    lastPageExtrasHtml += `<div class="fppl-badge"><span class="fppl-label">First Peoples Principle</span>${m.fppl}</div><br>`;
+  }
+  if(m.examples){
+    lastPageExtrasHtml += m.examples.map(ex => `<div class="example-box"><div class="label">Example</div><p>${ex}</p></div>`).join('');
+  }
+  if(m.stageQuestions){
+    const qaRevealed = state.stageQARevealed[m.id];
+    lastPageExtrasHtml += `
+      <div class="stage-qa-box">
+        <div class="label">Questions the Nation Asks at This Stage</div>
+        ${m.stageQuestions.map(item => `
+          <div class="stage-qa-item">
+            <div class="stage-qa-q">${item.q}</div>
+            ${qaRevealed ? `<div class="stage-qa-a">${item.a}</div>` : ''}
+          </div>
+        `).join('')}
+        <button class="selfcheck-toggle" style="margin-top:4px;" onclick="toggleStageQA(${idLiteral})">${qaRevealed ? 'Hide Answers' : 'Show Answers'}</button>
+      </div>
+    `;
+  }
+  if(!isFinal){
+    lastPageExtrasHtml += `
+      <div class="next-steps-note">
+        Ready to keep going? Head to the <strong>Review</strong> tab to try the case file entry, then move on to the <strong>Knowledge Check</strong> once you feel ready and confident.
+      </div>
+    `;
+  }
+  const tabSequence = ['learn'];
+  const cumulativeVocab = isFinal ? (m.vocab||[]) : MODULES.filter(mm => mm.id <= m.id).reduce((all,mm) => all.concat(mm.vocab||[]), []);
+  if(cumulativeVocab.length) tabSequence.push('glossary');
+  if(!isFinal) tabSequence.push('assignment');
+  if(m.id === 7) tabSequence.push('template');
+  tabSequence.push('test');
+  const tabDisplayNames = { learn:'Learn', glossary:'Glossary', assignment:'Review', template:'Case File Template', test:testTabLabel };
+  function continueButton(fromTab){
+    const idx = tabSequence.indexOf(fromTab);
+    if(idx === -1 || idx === tabSequence.length - 1) return '';
+    const nextTab = tabSequence[idx+1];
+    return `<button class="continue-btn" onclick="selectTab('${nextTab}')">Continue to ${tabDisplayNames[nextTab]} &rarr;</button>`;
+  }
+
+  if(m.pages){
+    const curPage = state.learnPage[m.id] || 0;
+    const page = m.pages[curPage];
+    const vocabPageIndex = (m.vocabPage !== undefined) ? m.vocabPage : 1;
+    const isVocabPage = curPage === vocabPageIndex;
+    const isLastPage = curPage === m.pages.length - 1;
+    const dots = m.pages.map((p,i) => `<div class="page-dot ${i===curPage?'active':''}" onclick="goToPage(${idLiteral},${i})"></div>`).join('');
+    learnBodyHtml = `
+      <div class="page-title">${page.title}</div>
+      <div class="content-text">${page.paragraphs.map(p=>`<p>${p}</p>`).join('')}</div>
+      ${isVocabPage ? inlineVocabHtml : ''}
+      <div class="page-nav">
+        <button class="page-btn" ${curPage===0?'disabled':''} onclick="goToPage(${idLiteral},${curPage-1})">&larr; Back</button>
+        <div class="page-dots">${dots}</div>
+        <button class="page-btn" ${curPage===m.pages.length-1?'disabled':''} onclick="goToPage(${idLiteral},${curPage+1})">Next &rarr;</button>
+      </div>
+    `;
+    if(isLastPage){
+      if(m.diagramSteps){
+        learnBodyHtml += `
+        <div class="diagram-box" style="margin-top:24px;">
+          ${flowDiagram(m.diagramSteps)}
+        </div>`;
+      }
+      learnBodyHtml += lastPageExtrasHtml;
+      learnBodyHtml += `<div class="tab-continue-row">${continueButton('learn')}</div>`;
+    }
+  } else {
+    learnBodyHtml = `<div class="content-text">${m.content.map(p=>`<p>${p}</p>`).join('')}</div>`;
+    learnBodyHtml += inlineVocabHtml;
+    if(m.example){
+      learnBodyHtml += `<div class="example-box"><div class="label">Example</div><p>${m.example}</p></div>`;
+    }
+    if(m.diagramSteps){
+      learnBodyHtml += `
+      <div class="diagram-box">
+        ${flowDiagram(m.diagramSteps)}
+      </div>`;
+    }
+    learnBodyHtml += lastPageExtrasHtml;
+    learnBodyHtml += `<div class="tab-continue-row">${continueButton('learn')}</div>`;
+  }
+
+  const glossaryTabHtml = (cumulativeVocab.length) ? `<button class="tab ${state.activeTab==='glossary'?'active':''}" onclick="selectTab('glossary')">Glossary</button>` : '';
+  const glossaryPanelHtml = (cumulativeVocab.length) ? `
+    <div class="panel ${state.activeTab==='glossary'?'active':''}">
+      <div class="assignment-box">
+        <div class="label">${isFinal ? 'Full Course Glossary' : 'Glossary'}</div>
+        ${cumulativeVocab.map(v => `
+          <div style="margin-bottom:16px;">
+            <div style="font-family:'Oswald',sans-serif; font-weight:600; font-size:17px; color:var(--blue-deep); margin-bottom:3px; text-transform:uppercase; letter-spacing:.02em;">${v.term}</div>
+            <div style="font-size:14.5px; color:var(--ink-soft); line-height:1.6;">${v.def}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="tab-continue-row">${continueButton('glossary')}</div>
+    </div>
+  ` : '';
+
+  const assignmentTabHtml = isFinal ? '' : `<button class="tab ${state.activeTab==='assignment'?'active':''}" onclick="selectTab('assignment')">Review</button>`;
+  const assignmentPanelHtml = isFinal ? '' : `
+    <div class="panel ${state.activeTab==='assignment'?'active':''}">
+      <div class="assignment-box">
+        <div class="label">Case File Entry</div>
+        <p>${m.assignment.instructions}</p>
+        <ul>${m.assignment.items.map(it=>`<li>${it}</li>`).join('')}</ul>
+        ${m.assignment.modelResponse ? `
+        <button class="model-toggle" onclick="toggleModelResponse(${idLiteral})">${state.modelRevealed[m.id] ? 'Hide Example Response' : 'See an Example Response First'}</button>
+        ${state.modelRevealed[m.id] ? `
+        <div class="model-panel">
+          <div class="label">Example Response</div>
+          <p>${m.assignment.modelResponse}</p>
+        </div>` : ''}` : ''}
+        <textarea class="log" placeholder="Write your case file entry here..."></textarea>
+        <div class="log-hint">${m.assignment.hint}</div>
+        ${m.assignment.selfCheck ? `
+        <button class="selfcheck-toggle" onclick="toggleSelfCheck(${idLiteral})">${state.selfCheckRevealed[m.id] ? 'Hide Self-Check Guidance' : 'Submit for Self-Check'}</button>
+        ${state.selfCheckRevealed[m.id] ? `
+        <div class="selfcheck-panel">
+          <div class="label">Self-Check Guidance</div>
+          <div class="disclaimer">This isn't a graded answer key — compare it against what you wrote above and revise if something's missing.</div>
+          <ul>${m.assignment.selfCheck.map(it=>`<li>${it}</li>`).join('')}</ul>
+        </div>` : ''}` : ''}
+      </div>
+      <div class="tab-continue-row">${continueButton('assignment')}</div>
+    </div>
+  `;
+
+  const templateTabHtml = (m.id === 7) ? `<button class="tab ${state.activeTab==='template'?'active':''}" onclick="selectTab('template')">Case File Template</button>` : '';
+  const templatePanelHtml = (m.id === 7) ? `
+    <div class="panel ${state.activeTab==='template'?'active':''}">
+      <div class="assignment-box">
+        <div class="label">Complete Case File Template</div>
+        <div class="template-intro">
+          This pulls together the headings from all seven modules into one reusable template. Copy it, adapt the headings to fit, and use it for a real project coming your way — it doesn't need to stay tied to Copper Ridge or Tsilaqw Nation.
+        </div>
+        ${CASE_FILE_TEMPLATE.map((section,i) => `
+          <div class="template-section">
+            <h3>${section.heading}</h3>
+            <ul>${section.prompts.map(p=>`<li>${p}</li>`).join('')}</ul>
+            <textarea class="template-textarea" id="template-ta-${i}" placeholder="Notes for this section..."></textarea>
+          </div>
+        `).join('')}
+        ${isFinalExamPassed() ? `
+        <button class="primary" onclick="downloadCaseFileTemplate()">Download Template</button>
+        <div class="log-hint" style="margin-top:10px;">Downloads as a plain text file, including anything you've typed above, so you can keep working on it outside the browser.</div>
+        ` : `
+        <button class="primary" disabled style="opacity:.4; cursor:not-allowed;">Download Template</button>
+        <div class="log-hint" style="margin-top:10px;">Locked until you pass the <strong>Final Certification</strong> exam at 80% or higher. Your notes above are safe — finish the final exam, then come back here to download.</div>
+        `}
+      </div>
+      <div class="tab-continue-row">${continueButton('template')}</div>
+    </div>
+  ` : '';
+
+  document.getElementById('main').innerHTML = `
+    <div class="stage-tag">${stageTagText}</div>
+    <h2 class="module-title">${m.title}</h2>
+    <div class="module-stage-line">Case file: Copper Ridge Project · Tsilaqw Nation</div>
+
+    <div class="tabs">
+      <button class="tab ${state.activeTab==='learn'?'active':''}" onclick="selectTab('learn')">Learn</button>
+      ${glossaryTabHtml}
+      ${assignmentTabHtml}
+      ${templateTabHtml}
+      <button class="tab ${state.activeTab==='test'?'active':''}" onclick="selectTab('test')">${testTabLabel}</button>
+    </div>
+
+    <div class="panel ${state.activeTab==='learn'?'active':''}">
+      ${learnBodyHtml}
+    </div>
+
+    ${glossaryPanelHtml}
+    ${assignmentPanelHtml}
+    ${templatePanelHtml}
+
+
+    <div class="panel ${state.activeTab==='test'?'active':''}">
+      <div class="progress-strip">${progressDots}</div>
+      ${quizBody}
+      ${resultHtml}
+      <div class="quiz-actions">
+        ${!qs.submitted ? `<button class="primary" ${!allAnswered?'disabled style="opacity:.45;cursor:not-allowed;"':''} onclick="submitQuiz(${moduleIdForJs})">${submitLabel}</button>` : `<button class="primary" onclick="retakeQuiz(${moduleIdForJs})">${retakeLabel}</button>`}
+        <span style="font-size:12px; color:var(--paper-dim); font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase;">80% required to pass · repeatable</span>
+      </div>
+    </div>
+  `;
+
+  renderVocabRail(m);
+}
+
+function renderVocabRail(m){
+  const rail = document.getElementById('vocabRail');
+  if(!m.vocab || m.vocab.length === 0){
+    rail.innerHTML = '';
+    return;
+  }
+  rail.innerHTML = `
+    <div class="vocab-rail-inner">
+      <div class="vocab-rail-label">Vocabulary — Module ${String(m.id).padStart(2,'0')}</div>
+      ${m.vocab.map(v => `
+        <div class="vocab-bubble">
+          <div class="term">${v.term}</div>
+          <div class="def">${v.def}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function render(){
+  renderSidebar();
+  renderMain();
+}
+
+render();
+</script>
+</body>
+</html>
