@@ -106,10 +106,13 @@
 
   /* Main */
   .main{
-    flex:0 1 820px; padding:44px 56px;
+    flex:1 1 auto; max-width:900px; padding:44px 56px;
     background:var(--paper-card);
     min-height:100vh;
     box-shadow: -1px 0 0 var(--line) inset;
+  }
+  .main.centered{
+    flex-grow:0; margin-left:auto; margin-right:auto;
   }
   .vocab-inline-wrap{
     display:flex; flex-wrap:wrap; gap:12px; margin:10px 0 20px;
@@ -1647,7 +1650,7 @@ function emailFeedback(){
 }
 
 function renderFeedbackView(){
-  document.getElementById('vocabRail').innerHTML = '';
+  document.getElementById('vocabRail').innerHTML = ''; document.getElementById('vocabRail').style.display = 'none'; document.getElementById('main').classList.add('centered');
   const allAnswered = FEEDBACK_QUESTIONS.every(q => state.feedbackAnswers[q.id]);
   let html = `
     <div class="stage-tag">Course Feedback</div>
@@ -1694,7 +1697,7 @@ function renderFeedbackView(){
 }
 
 function renderDashboardView(){
-  document.getElementById('vocabRail').innerHTML = '';
+  document.getElementById('vocabRail').innerHTML = ''; document.getElementById('vocabRail').style.display = 'none'; document.getElementById('main').classList.add('centered');
   const rows = MODULES.map(m => {
     const qs = state.quizState[m.id];
     const pct = qs.submitted ? Math.round((qs.score/qs.total)*100) : null;
@@ -1749,7 +1752,7 @@ function renderDashboardView(){
 }
 
 function renderMyCaseFileView(){
-  document.getElementById('vocabRail').innerHTML = '';
+  document.getElementById('vocabRail').innerHTML = ''; document.getElementById('vocabRail').style.display = 'none'; document.getElementById('main').classList.add('centered');
   const moduleRows = MODULES.map(m => {
     const answer = (state.reviewAnswers[m.id] || '').trim();
     const started = answer.length > 0;
@@ -1836,10 +1839,15 @@ function downloadEverything(){
 
 function renderVocabRail(m){
   const rail = document.getElementById('vocabRail');
+  const main = document.getElementById('main');
   if(!m.vocab || m.vocab.length === 0){
     rail.innerHTML = '';
+    rail.style.display = 'none';
+    main.classList.add('centered');
     return;
   }
+  rail.style.display = '';
+  main.classList.remove('centered');
   rail.innerHTML = `
     <div class="vocab-rail-inner">
       <div class="vocab-rail-label">Vocabulary — Module ${String(m.id).padStart(2,'0')}</div>
