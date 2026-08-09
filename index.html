@@ -396,6 +396,7 @@
   }
   .progress-dot.done{background:var(--pass-deep);}
   .progress-dot.failed{background:var(--fail-deep);}
+  .progress-dot.current{height:7px; margin-top:-1.5px; box-shadow:0 0 0 1px var(--copper);}
 
   ::-webkit-scrollbar{width:9px;}
   ::-webkit-scrollbar-thumb{background:var(--line); border-radius:5px;}
@@ -1032,6 +1033,12 @@ state.feedbackComment = '';
 state.feedbackSubmitted = false;
 state.reviewAnswers = {};
 state.templateAnswers = {};
+state.quizPage = {};
+
+function goToQuizPage(moduleId, pageIndex){
+  state.quizPage[moduleId] = pageIndex;
+  render();
+}
 
 function escapeHtml(str){
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1315,11 +1322,13 @@ function submitQuiz(moduleId){
   qs.submitted = true;
   qs.score = score;
   qs.total = mod.quiz.length;
+  state.quizPage[moduleId] = 0;
   render();
 }
 
 function retakeQuiz(moduleId){
   state.quizState[moduleId] = {answers:{}, submitted:false};
+  state.quizPage[moduleId] = 0;
   render();
 }
 
@@ -1334,32 +1343,40 @@ function renderMain(){
   const allAnswered = m.quiz.every((q,i)=> qs.answers[i] !== undefined);
 
   const idLiteral = (typeof m.id === 'string') ? `'${m.id}'` : m.id;
-  let quizBody = '';
-  m.quiz.forEach((q,i) => {
-    let optsHtml = '';
-    q.opts.forEach((opt, oi) => {
-      const checked = qs.answers[i] === oi ? 'checked' : '';
-      const disabled = qs.submitted ? 'disabled' : '';
-      let optColor = '';
-      if(qs.submitted){
-        if(oi === q.correct) optColor = 'style="color:var(--pass);"';
-        else if(qs.answers[i] === oi && oi !== q.correct) optColor = 'style="color:var(--fail); text-decoration:line-through;"';
-      }
-      optsHtml += `
-        <div class="option">
-          <input type="radio" name="q${i}" id="q${i}o${oi}" ${checked} ${disabled} onchange="selectAnswer(${idLiteral},${i},${oi})">
-          <label for="q${i}o${oi}" ${optColor}>${opt}</label>
-        </div>
-      `;
-    });
-    quizBody += `
-      <div class="quiz-q">
-        <div class="qnum">Question ${i+1} of ${m.quiz.length}</div>
-        <div class="qtext">${q.q}</div>
-        ${optsHtml}
+  const totalQ = m.quiz.length;
+  let curQ = state.quizPage[m.id] || 0;
+  if(curQ >= totalQ) curQ = totalQ - 1;
+  if(curQ < 0) curQ = 0;
+
+  const q = m.quiz[curQ];
+  let optsHtml = '';
+  q.opts.forEach((opt, oi) => {
+    const checked = qs.answers[curQ] === oi ? 'checked' : '';
+    const disabled = qs.submitted ? 'disabled' : '';
+    let optColor = '';
+    if(qs.submitted){
+      if(oi === q.correct) optColor = 'style="color:var(--pass);"';
+      else if(qs.answers[curQ] === oi && oi !== q.correct) optColor = 'style="color:var(--fail); text-decoration:line-through;"';
+    }
+    optsHtml += `
+      <div class="option">
+        <input type="radio" name="q${curQ}" id="q${curQ}o${oi}" ${checked} ${disabled} onchange="selectAnswer(${idLiteral},${curQ},${oi})">
+        <label for="q${curQ}o${oi}" ${optColor}>${opt}</label>
       </div>
     `;
   });
+  const quizBody = `
+    <div class="quiz-q">
+      <div class="qnum">Question ${curQ+1} of ${totalQ}</div>
+      <div class="qtext">${q.q}</div>
+      ${optsHtml}
+    </div>
+    <div class="page-nav">
+      <button class="page-btn" ${curQ===0?'disabled':''} onclick="goToQuizPage(${idLiteral},${curQ-1})">&larr; Back</button>
+      <div class="page-dots">${m.quiz.map((qq,i)=>`<div class="page-dot ${i===curQ?'active':''}" onclick="goToQuizPage(${idLiteral},${i})"></div>`).join('')}</div>
+      <button class="page-btn" ${curQ===totalQ-1?'disabled':''} onclick="goToQuizPage(${idLiteral},${curQ+1})">Next &rarr;</button>
+    </div>
+  `;
 
   let resultHtml = '';
   if(qs.submitted){
@@ -1387,8 +1404,10 @@ function renderMain(){
   }
 
   const progressDots = m.quiz.map((q,i) => {
-    if(!qs.submitted) return '<div class="progress-dot"></div>';
-    return qs.answers[i] === q.correct ? '<div class="progress-dot done"></div>' : '<div class="progress-dot failed"></div>';
+    let cls = 'progress-dot';
+    if(qs.submitted) cls += (qs.answers[i] === q.correct ? ' done' : ' failed');
+    if(i === curQ) cls += ' current';
+    return `<div class="${cls}" onclick="goToQuizPage(${idLiteral},${i})" style="cursor:pointer;"></div>`;
   }).join('');
 
   // Learn content: paginated (m.pages) or legacy flat (m.content)
@@ -1592,8 +1611,8 @@ function renderMain(){
 
     <div class="panel ${state.activeTab==='test'?'active':''}">
       <div class="progress-strip">${progressDots}</div>
-      ${quizBody}
       ${resultHtml}
+      ${quizBody}
       <div class="quiz-actions">
         ${!qs.submitted ? `<button class="primary" ${!allAnswered?'disabled style="opacity:.45;cursor:not-allowed;"':''} onclick="submitQuiz(${moduleIdForJs})">${submitLabel}</button>` : `<button class="primary" onclick="retakeQuiz(${moduleIdForJs})">${retakeLabel}</button>`}
         <span style="font-size:12px; color:var(--paper-dim); font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase;">80% required to pass · repeatable</span>
