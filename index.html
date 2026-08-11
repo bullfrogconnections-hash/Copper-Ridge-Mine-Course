@@ -205,12 +205,13 @@
   }
   .tab:hover{color:var(--ink);}
   .tab.active{color:var(--copper-deep); border-bottom-color:var(--copper);}
-  .tab-utility{
-    margin-left:auto; margin-right:0; color:var(--blue-deep); border-bottom-color:transparent;
+  .tab-right{ margin-left:0; border-bottom-color:transparent; }
+  .tab-right:first-of-type{ margin-left:auto; }
+  .tab-save-btn{
+    border:1px solid var(--blue) !important; border-radius:5px; color:var(--blue-deep) !important;
+    padding:9px 14px !important; margin-bottom:4px;
   }
-  .tab-utility:first-of-type{ margin-left:auto; }
-  .tab-utility ~ .tab-utility{ margin-left:0; }
-  .tab-utility:hover{color:var(--blue); border-bottom-color:var(--blue);}
+  .tab-save-btn:hover{ background:rgba(115,163,207,0.1); color:var(--blue) !important; }
 
   .panel{display:none;}
   .panel.active{display:block; animation:fadeIn .25s ease;}
@@ -303,6 +304,27 @@
     padding:14px 18px; margin-top:16px; font-size:14px; color:var(--ink-soft); line-height:1.65;
   }
 
+  .progress-io-box{
+    background:var(--paper-card-alt); border:1px solid var(--line-light); border-radius:8px;
+    padding:22px 26px; margin-top:24px;
+  }
+  .progress-io-box .label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    font-size:10.5px; color:var(--copper-deep); margin-bottom:10px;
+  }
+  .progress-io-box p{font-size:14px; color:var(--ink-soft); line-height:1.65; margin:0 0 16px;}
+  .progress-drop-zone{
+    margin-top:18px; border:2px dashed var(--blue); border-radius:8px; padding:30px 20px;
+    text-align:center; font-size:14px; color:var(--ink-soft);
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .progress-drop-zone.drag-over{ background:rgba(115,163,207,0.14); border-color:var(--copper); }
+  .browse-label{
+    display:inline-block; padding:9px 18px; border:1px solid var(--blue); border-radius:5px;
+    color:var(--blue-deep); font-family:'Inter',sans-serif; font-weight:600; font-size:13px; cursor:pointer;
+  }
+  .browse-label:hover{ background:rgba(115,163,207,0.1); }
+
   .extend-box{
     background:var(--paper-card-alt); border:1px solid var(--blue); border-radius:6px;
     padding:20px 24px; margin:0 0 24px;
@@ -341,6 +363,13 @@
     font-size:14px; color:var(--ink-soft); line-height:1.6; text-align:center;
   }
   .next-steps-note strong{color:var(--copper-deep);}
+
+  .save-reminder{
+    margin-top:12px; padding:14px 20px; background:rgba(115,163,207,0.1);
+    border:1px dashed var(--blue); border-radius:6px;
+    font-size:13.5px; color:var(--ink-soft); line-height:1.6; text-align:center;
+  }
+  .save-reminder strong{color:var(--blue-deep);}
 
   .selfcheck-toggle{
     margin-top:14px; background:none; border:1px solid var(--line-light); color:var(--copper-deep);
@@ -438,8 +467,8 @@
     .app{flex-direction:column;}
     .sidebar{width:100%; height:auto; position:relative;}
     .main{padding:28px 20px;}
-    .tab-utility{ margin-left:0; }
-    .tab-utility:first-of-type{ margin-left:0; margin-top:10px; padding-top:14px; border-top:1px solid var(--line-light); width:100%; }
+    .tab-right{ margin-left:0; }
+    .tab-right:first-of-type{ margin-left:0; margin-top:10px; padding-top:14px; border-top:1px solid var(--line-light); width:100%; }
   }
 
   .gate-overlay{
@@ -1150,6 +1179,7 @@ state.feedbackComment = '';
 state.feedbackSubmitted = false;
 state.reviewAnswers = {};
 state.templateAnswers = {};
+state.loadProgressMessage = null;
 state.quizPage = {};
 
 function goToQuizPage(moduleId, pageIndex){
@@ -1623,6 +1653,9 @@ function renderMain(){
       <div class="next-steps-note">
         Ready to keep going? Head to the <strong>Review</strong> tab to try the case file entry, then move on to the <strong>Knowledge Check</strong> once you feel ready and confident.
       </div>
+      <div class="save-reminder">
+        &#128190; Stopping here for today? Click <strong>Save Progress</strong> above before you close this tab, so nothing is lost when you come back.
+      </div>
     `;
   }
   const tabSequence = ['learn'];
@@ -1774,8 +1807,9 @@ function renderMain(){
       ${assignmentTabHtml}
       ${templateTabHtml}
       <button class="tab ${state.activeTab==='test'?'active':''}" onclick="selectTab('test')">${testTabLabel}</button>
-      <button class="tab tab-utility" onclick="selectModule('mycasefile')">My Case File</button>
-      <button class="tab tab-utility" onclick="downloadEverything()">Download Everything</button>
+      <button class="tab tab-right" onclick="selectModule('mycasefile')">My Case File</button>
+      <button class="tab tab-right tab-save-btn" onclick="saveProgressFile()">Save Progress</button>
+      <button class="tab tab-right tab-save-btn" onclick="downloadEverything()">Portfolio Download</button>
     </div>
 
     <div class="panel ${state.activeTab==='learn'?'active':''}">
@@ -1927,6 +1961,91 @@ function renderFeedbackView(){
   document.getElementById('main').innerHTML = html;
 }
 
+// ---------------------------------------------------------------------------
+// Save & Resume: exports/imports a small file with everything needed to pick
+// up where a participant left off -- module scores, Review writing, and
+// Case File Template notes. Works on any device, with no internet required.
+// ---------------------------------------------------------------------------
+function collectProgressSnapshot(){
+  return {
+    savedAt: new Date().toISOString(),
+    quizState: state.quizState,
+    reviewAnswers: state.reviewAnswers,
+    templateAnswers: state.templateAnswers,
+    selectedJurisdiction: state.selectedJurisdiction,
+  };
+}
+
+function saveProgressFile(){
+  const snapshot = collectProgressSnapshot();
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "Copper_Ridge_My_Progress.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function applyProgressSnapshot(snapshot){
+  if(!snapshot || typeof snapshot !== 'object') throw new Error('Invalid progress file');
+  if(snapshot.quizState){
+    Object.keys(snapshot.quizState).forEach(key => {
+      if(state.quizState.hasOwnProperty(key)) state.quizState[key] = snapshot.quizState[key];
+    });
+  }
+  if(snapshot.reviewAnswers) Object.assign(state.reviewAnswers, snapshot.reviewAnswers);
+  if(snapshot.templateAnswers) Object.assign(state.templateAnswers, snapshot.templateAnswers);
+  if(snapshot.selectedJurisdiction) state.selectedJurisdiction = snapshot.selectedJurisdiction;
+}
+
+function loadProgressFile(file){
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const snapshot = JSON.parse(e.target.result);
+      applyProgressSnapshot(snapshot);
+      const when = snapshot.savedAt ? new Date(snapshot.savedAt).toLocaleString() : null;
+      state.loadProgressMessage = { type:'success', text: 'Progress loaded successfully' + (when ? ' — saved ' + when + '.' : '.') };
+    }catch(err){
+      state.loadProgressMessage = { type:'error', text: 'Couldn\'t read that file. Make sure it\'s the .json file downloaded from "Save Progress."' };
+    }
+    render();
+  };
+  reader.onerror = function(){
+    state.loadProgressMessage = { type:'error', text: 'Couldn\'t read that file — please try again.' };
+    render();
+  };
+  reader.readAsText(file);
+}
+
+function handleProgressFileInput(input){
+  if(input.files && input.files[0]) loadProgressFile(input.files[0]);
+}
+
+function handleProgressDrop(event){
+  event.preventDefault();
+  const zone = document.getElementById('progressDropZone');
+  if(zone) zone.classList.remove('drag-over');
+  if(event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]){
+    loadProgressFile(event.dataTransfer.files[0]);
+  }
+}
+
+function handleProgressDragOver(event){
+  event.preventDefault();
+  const zone = document.getElementById('progressDropZone');
+  if(zone) zone.classList.add('drag-over');
+}
+
+function handleProgressDragLeave(event){
+  const zone = document.getElementById('progressDropZone');
+  if(zone) zone.classList.remove('drag-over');
+}
+
 function renderMyCaseFileView(){
   document.getElementById('vocabRail').innerHTML = ''; document.getElementById('vocabRail').style.display = 'none'; document.getElementById('main').classList.add('centered');
   const moduleRows = MODULES.map(m => {
@@ -1967,6 +2086,20 @@ function renderMyCaseFileView(){
         <button class="primary" onclick="downloadEverything()">Download Everything</button>
         <div class="log-hint" style="margin-top:10px;">Downloads all your case file writing — every module's Review entry plus your Case File Template — as one file you can keep.</div>
       </div>
+    </div>
+
+    <div class="progress-io-box">
+      <div class="label">Save & Resume Later</div>
+      <p>Working across more than one day? Click <strong>Save Progress</strong> before you go — it saves your module scores, Review writing, and Case File notes to a small file. Next time, load that file back in below to pick up exactly where you left off, on this device or a different one.</p>
+      <button class="primary" onclick="saveProgressFile()">Save Progress</button>
+      <div class="progress-drop-zone" id="progressDropZone"
+        ondrop="handleProgressDrop(event)" ondragover="handleProgressDragOver(event)" ondragleave="handleProgressDragLeave(event)">
+        <div>Drag your saved progress file here</div>
+        <div style="font-size:12px; color:var(--ink-dim); margin:8px 0;">or</div>
+        <label class="browse-label" for="progressFileInput">Browse for file</label>
+        <input type="file" id="progressFileInput" accept="application/json,.json" style="display:none;" onchange="handleProgressFileInput(this)">
+      </div>
+      ${state.loadProgressMessage ? `<div style="margin-top:14px; font-size:13.5px; font-weight:600; ${state.loadProgressMessage.type==='success' ? 'color:var(--pass-deep);' : 'color:var(--fail-deep);'}">${state.loadProgressMessage.text}</div>` : ''}
     </div>
   `;
   document.getElementById('main').innerHTML = html;
