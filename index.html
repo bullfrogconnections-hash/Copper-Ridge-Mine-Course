@@ -254,6 +254,19 @@
   }
   .model-panel p{font-size:14px; line-height:1.7; color:var(--ink-soft); margin:0; font-style:italic;}
 
+  .jurisdiction-picker{
+    display:flex; align-items:center; gap:10px; margin-bottom:18px; padding:12px 16px;
+    background:var(--paper-card-alt); border:1px solid var(--blue); border-radius:6px;
+  }
+  .jurisdiction-picker label{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:12.5px; color:var(--blue-deep);
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .jurisdiction-picker select{
+    flex:1; padding:8px 10px; border:1px solid var(--line-light); border-radius:5px;
+    background:#fffdf7; color:var(--ink); font-family:'Inter',sans-serif; font-size:14px; max-width:280px;
+  }
+
   .compare-table{
     display:flex; gap:16px; margin:14px 0 20px; flex-wrap:wrap;
   }
@@ -284,6 +297,26 @@
     font-size:14px; color:var(--ink-soft); line-height:1.6; padding-left:14px;
     border-left:2px solid var(--copper);
   }
+
+  .leverage-callback{
+    background:rgba(115,163,207,0.1); border-left:3px solid var(--blue); border-radius:4px;
+    padding:14px 18px; margin-top:16px; font-size:14px; color:var(--ink-soft); line-height:1.65;
+  }
+
+  .extend-box{
+    background:var(--paper-card-alt); border:1px solid var(--blue); border-radius:6px;
+    padding:20px 24px; margin:0 0 24px;
+  }
+  .extend-box .label{
+    font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    font-size:10.5px; color:var(--blue-deep); margin-bottom:12px;
+  }
+  .extend-box p{font-size:14.5px; color:var(--ink); line-height:1.6; margin:0 0 14px;}
+  .extend-links{display:flex; flex-direction:column; gap:8px;}
+  .extend-link{
+    font-size:13.5px; font-weight:600; color:var(--blue-deep); text-decoration:none;
+  }
+  .extend-link:hover{color:var(--blue); text-decoration:underline;}
 
   .template-intro{
     font-size:14.5px; line-height:1.7; color:var(--ink-soft); margin-bottom:24px;
@@ -464,6 +497,25 @@ const FNMPC_RESOURCES = [
   { label:"All Tools & Resources", url:"https://fnmpc.ca/tools-resources/" },
 ];
 
+// Sourced directly from FNMPC's own published "Jurisdictional Scans of Environmental
+// Assessment Processes" (fnmpc.ca/tools-resources/environmental-tools/), including the
+// summary table in Appendix 1 of the Alberta scan. Lets Module 5 reflect the learner's
+// own province or territory instead of assuming British Columbia.
+const JURISDICTIONS = {
+  bc: { name:"British Columbia", law:"Environmental Assessment Act (2018)", authority:"BC Environmental Assessment Office (EAO)", scanUrl:"https://fnmpc.ca/wp-content/uploads/BC.pdf" },
+  alberta: { name:"Alberta", law:"Environmental Protection and Enhancement Act (EPEA)", authority:"Alberta Energy Regulator (AER) / Alberta Environment and Protected Areas (AEPA)", scanUrl:"https://fnmpc.ca/wp-content/uploads/Alberta.pdf" },
+  saskatchewan: { name:"Saskatchewan", law:"Environmental Assessment Act", authority:"Environmental Assessment and Stewardship Branch (EASB)", scanUrl:"https://fnmpc.ca/wp-content/uploads/Saskatchewan.pdf" },
+  manitoba: { name:"Manitoba", law:"The Environment Act", authority:"Environmental Approvals Branch (EAB)", scanUrl:"https://fnmpc.ca/wp-content/uploads/manitoba.pdf" },
+  ontario: { name:"Ontario", law:"Environmental Assessment Act (1990)", authority:"Minister of the Environment, Conservation and Parks (MECP)", scanUrl:"https://fnmpc.ca/wp-content/uploads/ontario.pdf" },
+  quebec: { name:"Quebec", law:"Environment Quality Act (EQA)", authority:"Ministère de l'Environnement, de la Lutte contre les changements climatiques, de la Faune et des Parcs (MELCCFP)", scanUrl:"https://fnmpc.ca/wp-content/uploads/quebec.pdf" },
+  newbrunswick: { name:"New Brunswick", law:"Clean Environment Act", authority:"Environmental Impact Assessment Branch", scanUrl:"https://fnmpc.ca/wp-content/uploads/new-brunswick.pdf" },
+  pei: { name:"Prince Edward Island", law:"Environmental Protection Act", authority:"Department of Land and Environment", scanUrl:"https://fnmpc.ca/wp-content/uploads/PEI.pdf" },
+  novascotia: { name:"Nova Scotia", law:"Environment Act", authority:"Environmental Assessment Branch (EAB)", scanUrl:"https://fnmpc.ca/wp-content/uploads/nova-scotia.pdf" },
+  nl: { name:"Newfoundland and Labrador", law:"Environmental Protection Act (2002)", authority:"Environmental Assessment Division", scanUrl:"https://fnmpc.ca/wp-content/uploads/newfoundland-and-labrador.pdf" },
+  yukon: { name:"Yukon", law:"Yukon Environmental and Socio-Economic Assessment Act (2003)", authority:"Yukon Environmental Socio-Economic Assessment Board (YESAB)", scanUrl:"https://fnmpc.ca/wp-content/uploads/yukon.pdf" },
+  nwt: { name:"Northwest Territories", law:"Mackenzie Valley Resource Management Act (1998)", authority:"Mackenzie Valley Environmental Impact Review Board", scanUrl:"https://fnmpc.ca/wp-content/uploads/NWT.pdf" },
+};
+
 const FEEDBACK_QUESTIONS = [
   { id:"clarity", label:"The course content was clear and easy to understand." },
   { id:"navigation", label:"It was easy to find my way around the course (navigation)." },
@@ -590,6 +642,12 @@ const MODULES = [
         "Is your question something a real person could go find the answer to?"
       ]
     },
+    extendThinking:{
+      prompt:"Before word of Copper Ridge ever reaches a government office, what does \"meaningful\" engagement actually look like — and what does performative consultation look like instead? FNMPC's own campaign tackles this question directly.",
+      resources:[
+        { label:"Don't Tickety Box Me (film)", url:"https://fnmpc.ca/tools-resources/environmental-tools/" }
+      ]
+    },
     quiz:[
       {q:"What is the primary purpose of an Impact Assessment?",opts:["To approve projects quickly","To evaluate the potential effects of a proposed project before it proceeds","To collect taxes from proponents","To replace Indigenous laws"],correct:1},
       {q:"In IA terminology, who is the \"proponent\"?",opts:["The government regulator","The community affected by a project","The company or party proposing the project","An independent auditor"],correct:2},
@@ -652,6 +710,12 @@ const MODULES = [
         "Would this reason make sense to someone who wasn't in this course?"
       ]
     },
+    extendThinking:{
+      prompt:"Tsilaqw Nation chose to engage during Phase 0, before any formal process existed. What does a Nation risk by waiting for a formal trigger instead — and what does it risk by engaging too early, before it has the capacity to follow through? FNMPC's own research makes the case for engaging early.",
+      resources:[
+        { label:"The Case for Phase 0: Improving Impact Assessment Efficiency and Effectiveness", url:"https://fnmpc.ca/wp-content/uploads/FNMPC_Phase0_web_08192025.pdf" }
+      ]
+    },
     quiz:[
       {q:"What is \"Phase 0\" in Impact Assessment?",opts:["The final decision stage","The informal period before a formal IA process begins","A stage that only applies to federal projects","The public hearing stage"],correct:1},
       {q:"Why is early engagement valuable for a Nation?",opts:["It has no effect on outcomes","It lets a Nation help shape the process before positions harden","It is legally required in all cases","It replaces the need for any further assessment"],correct:1},
@@ -710,6 +774,13 @@ const MODULES = [
       selfCheck:[
         "Could your rule apply to a totally different project, not just Copper Ridge?",
         "Is it specific enough that someone else could actually check whether a project passes or fails it?"
+      ]
+    },
+    extendThinking:{
+      prompt:"FNMPC's Major Project Assessment Standard exists so Nations aren't left applying government-defined criteria to their own decisions. What would change if every Nation built and used its own standard, rather than treating government thresholds as the only measure that matters?",
+      resources:[
+        { label:"Major Project Assessment Standard", url:"https://fnmpc.ca/wp-content/uploads/FNMPCMPASFINAL.pdf" },
+        { label:"Guidance Appendices to the Major Projects Assessment Standard", url:"https://fnmpc.ca/wp-content/uploads/FNMPCMPASGuidanceappendices-FINALJanuary2020.pdf" }
       ]
     },
     quiz:[
@@ -785,6 +856,13 @@ const MODULES = [
         "Does your reason explain WHY that step matters, not just that it does?"
       ]
     },
+    extendThinking:{
+      prompt:"The federal process gives Indigenous Nations real influence at some stages and only consultation at others. Where in the four phases would you focus limited time and capacity if you could only fully engage with two of them?",
+      resources:[
+        { label:"Guide to Effective Indigenous Involvement in Federal Impact Assessment", url:"https://fnmpc.ca/wp-content/uploads/FNMPC_Guide_Oct15202_FINAL.pdf" },
+        { label:"Navigating the Federal Impact Assessment (8-part video series)", url:"https://fnmpc.ca/tools-resources/environmental-tools/" }
+      ]
+    },
     quiz:[
       {q:"Which best describes the general flow of a federal Impact Assessment?",opts:["Decision, then planning, then impact statement","Planning phase, impact statement, assessment, decision","Only one continuous hearing","There is no defined process"],correct:1},
       {q:"Where does Indigenous involvement carry the most real leverage in the federal process?",opts:["Only after the decision is made","Points where scope, information requirements, and conditions are still being shaped","Nowhere","Only in media coverage"],correct:1},
@@ -795,16 +873,17 @@ const MODULES = [
   },
   {
     id:5,
-    title:"Jurisdictional (BC) Impact Assessment",
-    stage:"Parallel provincial process",
+    title:"Jurisdictional Impact Assessment",
+    stage:"Parallel provincial or territorial process",
     fppl:"Learning involves patience and time.",
     pages:[
       {
         title:"Page 1 of 3 — Two Reviews at Once",
         paragraphs:[
-          "Copper Ridge doesn't just trigger a federal review. It's also big enough to trigger a separate BC review.",
+          "Copper Ridge doesn't just trigger a federal review. It's also big enough to trigger a separate {{JNAME}} review, under the {{JLAW}}, led by the {{JAUTHORITY}}.",
           "Now there are two processes running side by side — each with its own timeline, its own paperwork, and its own decision-maker. Here's roughly what each one tends to focus on:",
-          "<div class=\"compare-table\"><div class=\"compare-col\"><div class=\"compare-head\">Federal Review</div><ul><li>Effects crossing provincial or international lines</li><li>Federal lands and fisheries</li><li>Migratory birds, greenhouse gas emissions</li><li>Impacts on rights protected under federal law</li></ul></div><div class=\"compare-col\"><div class=\"compare-head\">Provincial (BC) Review</div><ul><li>Provincial environmental effects</li><li>Heritage and archaeological resources</li><li>Provincial economic effects</li><li>Land and water under provincial jurisdiction</li></ul></div></div>"
+          "<div class=\"compare-table\"><div class=\"compare-col\"><div class=\"compare-head\">Federal Review</div><ul><li>Effects crossing provincial or international lines</li><li>Federal lands and fisheries</li><li>Migratory birds, greenhouse gas emissions</li><li>Impacts on rights protected under federal law</li></ul></div><div class=\"compare-col\"><div class=\"compare-head\">{{JNAME}} Review</div><ul><li>Environmental effects within {{JNAME}}</li><li>Heritage and archaeological resources</li><li>Provincial or territorial economic effects</li><li>Land and water under {{JNAME}}'s jurisdiction</li></ul></div></div>",
+          "<div class=\"log-hint\">Working through this with your own Nation's context in mind? FNMPC has published a full jurisdictional scan for {{JNAME}} — <a href=\"{{JSCANURL}}\" target=\"_blank\" rel=\"noopener\" style=\"color:var(--blue-deep); font-weight:600;\">read it here</a>.</div>"
         ]
       },
       {
@@ -818,42 +897,49 @@ const MODULES = [
         title:"Page 3 of 3 — Comparing Takes Patience",
         paragraphs:[
           "It would be faster to just deal with each review separately, one at a time. But comparing them carefully — side by side — takes real patience.",
-          "That patience pays off: the Nation avoids doing the same work twice, and catches problems before they become a crisis."
+          "That patience pays off: the Nation avoids doing the same work twice, and catches problems before they become a crisis.",
+          "<div class=\"leverage-callback\">Worth carrying forward from Module 4: not every stage of the {{JNAME}} process offers the same leverage the federal process does. Some points are genuinely consultative — the Nation is asked, but the outcome doesn't have to change. Others carry real leverage, where the Nation's input can actually shift what happens. Comparing the two processes side by side is exactly how a Nation finds out which is which for a given project.</div>"
         ]
       }
     ],
-    diagramSteps:["Federal Process","BC Process","Compare & Sequence"],
+    diagramSteps:["Federal Process","Provincial / Territorial Process","Compare & Sequence"],
     vocab:[
-      {term:"Overlap", def:"When the same evidence could satisfy both the federal and BC reviews."},
+      {term:"Overlap", def:"When the same evidence could satisfy both the federal and provincial or territorial reviews."},
       {term:"Conflict", def:"When the two reviews want different things, on different timelines."},
       {term:"Harmonization", def:"Lining up the two reviews on purpose, so less work gets duplicated."}
     ],
     examples:[
-      "A proposed transmission line triggers a federal review because it crosses a waterway, and a BC review because of its size. Same overlap-and-conflict comparison applies."
+      "A proposed transmission line triggers a federal review because it crosses a waterway, and a {{JNAME}} review because of its size. Same overlap-and-conflict comparison applies."
     ],
     stageQuestions:[
       {q:"Do we have to prepare separate evidence for each review?", a:"Not always. If overlap is identified early, the same evidence can sometimes serve both reviews."},
       {q:"What if the two processes want conflicting things?", a:"Flag the conflict early to both reviewing bodies — sometimes timelines or requirements can be adjusted once it's raised."},
-      {q:"Is there a way to formally link the two reviews?", a:"Yes — ask about harmonization or substitution agreements between the federal and provincial agencies."}
+      {q:"Is there a way to formally link the two reviews?", a:"Yes — ask about harmonization or substitution agreements between the federal and provincial or territorial agencies."}
     ],
     assignment:{
       instructions:"Spot one overlap:",
       items:[
-        "Name ONE piece of evidence that could count for both the federal and BC reviews."
+        "Name ONE piece of evidence that could count for both the federal review and your own province or territory's review."
       ],
-      modelResponse:"Example: \"A water-quality study of the creek near the mine site could probably be used for both the federal review and the BC review — they'd both want to see that information.\"",
+      modelResponse:"Example: \"A water-quality study of the creek near the mine site could probably be used for both the federal review and the provincial review — they'd both want to see that information.\"",
       hint:"Think about what kind of evidence a company would have to collect anyway, for either process.",
       selfCheck:[
         "Is your example a real, specific piece of evidence — not just \"environmental information\" in general?",
         "Could you explain in one sentence why both reviews would want this same evidence?"
       ]
     },
+    extendThinking:{
+      prompt:"Comparing two review processes side by side takes real effort. What would it take for a Nation with limited staff capacity to meaningfully track both processes at once, rather than defaulting to whichever one moves first? FNMPC's jurisdictional scans exist to make this comparison faster.",
+      resources:[
+        { label:"All FNMPC Jurisdictional Scans (every province & territory)", url:"https://fnmpc.ca/tools-resources/environmental-tools/" }
+      ]
+    },
     quiz:[
-      {q:"Why might a project face both a federal and a provincial assessment?",opts:["It's a clerical error","Different triggers and jurisdictions can apply to the same project","Only one process is ever used","Provinces never assess major projects"],correct:1},
-      {q:"What is a key reason to compare federal and BC processes side by side?",opts:["To find strategic sequencing where requirements overlap or conflict","To pick whichever is shorter and ignore the other","There's no benefit","To avoid engaging with either"],correct:0},
-      {q:"In the case study, what does the BC process introduce alongside the federal one?",opts:["A duplicate decision with no differences","A parallel provincial environmental assessment with its own requirements","A ban on the mine","A private lawsuit"],correct:1},
-      {q:"This stage's task asks participants to:",opts:["Ignore jurisdictional overlap","Build a comparison table of the federal and BC processes for Copper Ridge","File a lawsuit","Draft a permit"],correct:1},
-      {q:"Harmonizing overlapping federal/provincial requirements primarily helps to:",opts:["Increase paperwork for its own sake","Reduce duplication and align timelines and evidence across processes","Guarantee project approval","Remove Indigenous involvement"],correct:1}
+      {q:"Why might a project face both a federal and a provincial or territorial assessment?",opts:["It's a clerical error","Different triggers and jurisdictions can apply to the same project","Only one process is ever used","Provinces never assess major projects"],correct:1},
+      {q:"What is a key reason to compare federal and provincial/territorial processes side by side?",opts:["To find strategic sequencing where requirements overlap or conflict","To pick whichever is shorter and ignore the other","There's no benefit","To avoid engaging with either"],correct:0},
+      {q:"In the case study, what does the provincial or territorial process introduce alongside the federal one?",opts:["A duplicate decision with no differences","A parallel provincial or territorial environmental assessment with its own requirements","A ban on the mine","A private lawsuit"],correct:1},
+      {q:"This stage's task asks participants to:",opts:["Ignore jurisdictional overlap","Build a comparison table of the federal and provincial/territorial processes for Copper Ridge","File a lawsuit","Draft a permit"],correct:1},
+      {q:"Harmonizing overlapping federal/provincial or territorial requirements primarily helps to:",opts:["Increase paperwork for its own sake","Reduce duplication and align timelines and evidence across processes","Guarantee project approval","Remove Indigenous involvement"],correct:1}
     ]
   },
   {
@@ -865,7 +951,7 @@ const MODULES = [
       {
         title:"Page 1 of 3 — Something's Still Missing",
         paragraphs:[
-          "The federal review is underway. The BC review is underway. But Tsilaqw Nation notices something: some things that matter most to the community aren't being looked at by either one.",
+          "The federal review is underway. The provincial or territorial review is underway. But Tsilaqw Nation notices something: some things that matter most to the community aren't being looked at by either one.",
           "So the Nation decides to run its own review — an <strong>Indigenous-led assessment</strong> — alongside the other two."
         ]
       },
@@ -880,7 +966,8 @@ const MODULES = [
       {
         title:"Page 3 of 3 — Centering Our Own Knowledge",
         paragraphs:[
-          "The federal and BC reviews were never built to fully understand what Tsilaqw Nation knows about this land. An Indigenous-led assessment fixes that — not by replacing the other two reviews, but by adding what only the Nation can bring."
+          "The federal and provincial or territorial reviews were never built to fully understand what Tsilaqw Nation knows about this land. An Indigenous-led assessment fixes that — not by replacing the other two reviews, but by adding what only the Nation can bring.",
+          "<div class=\"leverage-callback\">This is worth naming plainly, tying back to Module 4: federal involvement splits into moments of real leverage and moments that are merely consultative. An Indigenous-led assessment isn't a third category alongside those two — it's the one place in this whole process where the Nation holds leverage over everything, because the Nation is the one defining the scope, the questions, and the process itself.</div>"
         ]
       }
     ],
@@ -899,13 +986,19 @@ const MODULES = [
     assignment:{
       instructions:"Name what our review should cover:",
       items:[
-        "Write ONE thing Tsilaqw Nation's own review should look at that the federal and BC reviews might miss."
+        "Write ONE thing Tsilaqw Nation's own review should look at that the federal and provincial or territorial reviews might miss."
       ],
-      modelResponse:"Example: \"Our own review should look at how the mine's dust and noise would affect a nearby gathering site used for harvesting plants — something the federal and BC reviews probably won't ask about in detail.\"",
+      modelResponse:"Example: \"Our own review should look at how the mine's dust and noise would affect a nearby gathering site used for harvesting plants — something the federal and provincial or territorial reviews probably won't ask about in detail.\"",
       hint:"Think about what only Tsilaqw Nation would know to ask about.",
       selfCheck:[
-        "Is what you named something specific to this land or community, not something already covered by the federal or BC review stages?",
+        "Is what you named something specific to this land or community, not something already covered by the federal or provincial/territorial review stages?",
         "Could you explain in one sentence why the other reviews might miss it?"
+      ]
+    },
+    extendThinking:{
+      prompt:"An Indigenous-led assessment isn't just a parallel process running alongside the federal and provincial ones — it's the Nation defining what matters and how. What's the risk of scoping an ILA too narrowly, just to mirror what the federal or provincial review already covers?",
+      resources:[
+        { label:"An Introduction to Indigenous-Led Assessment: Key Considerations and Principles", url:"https://fnmpc.ca/wp-content/uploads/FNMPC_FL_ILA_singles_09182025_web.pdf" }
       ]
     },
     quiz:[
@@ -970,6 +1063,13 @@ const MODULES = [
         "Would this example make sense to someone who has never heard of Copper Ridge?"
       ]
     },
+    extendThinking:{
+      prompt:"Standard assessments are built to measure biophysical and economic effects. What gets lost when cultural and spiritual significance has to be translated into that same language just to be \"counted\"?",
+      resources:[
+        { label:"Spirit of the Land — Primer", url:"https://fnmpc.ca/wp-content/uploads/SOTL_PRIMER_01162026_web.pdf" },
+        { label:"Spirit of the Land — Implementation Guide", url:"https://fnmpc.ca/wp-content/uploads/SOTL_IMPLEMENTATION_01162026_web.pdf" }
+      ]
+    },
     quiz:[
       {q:"What is the primary purpose of a Cultural Rights Assessment?",opts:["To assess the physical engineering of a project","To document and evaluate impacts to cultural and spiritual practices, sites, and rights","To calculate tax revenue","To approve construction permits"],correct:1},
       {q:"In the case study, what specific issue drives this stage of the story?",opts:["A wage dispute","A sacred site located inside the proposed pit boundary","A zoning disagreement","A shipping route conflict"],correct:1},
@@ -1027,6 +1127,21 @@ state.quizState[FINAL_EXAM.id] = {answers:{}, submitted:false};
 state.selfCheckRevealed = {};
 state.modelRevealed = {};
 state.learnPage = {};
+state.selectedJurisdiction = 'bc';
+
+function applyJurisdiction(text){
+  const j = JURISDICTIONS[state.selectedJurisdiction] || JURISDICTIONS.bc;
+  return text
+    .replace(/\{\{JNAME\}\}/g, j.name)
+    .replace(/\{\{JLAW\}\}/g, j.law)
+    .replace(/\{\{JAUTHORITY\}\}/g, j.authority)
+    .replace(/\{\{JSCANURL\}\}/g, j.scanUrl);
+}
+
+function selectJurisdiction(key){
+  state.selectedJurisdiction = key;
+  render();
+}
 state.feedbackAnswers = {};
 state.feedbackSuggestions = '';
 state.feedbackComment = '';
@@ -1309,6 +1424,52 @@ function selectTab(tab){
   render();
 }
 
+// ---------------------------------------------------------------------------
+// Server sync: sends only structured completion data (module, score, pass/
+// fail) to the AWS backend over HTTPS. Never sends Review entries, Case File
+// Template notes, or feedback comments -- those stay local/downloadable only.
+// Leave PROGRESS_API_URL blank to run in local-only mode (nothing is sent,
+// nothing breaks) until the AWS backend described alongside this file is set up.
+// ---------------------------------------------------------------------------
+const PROGRESS_API_URL = ""; // <-- Paste your API Gateway invoke URL here, e.g. "https://abc123.execute-api.ca-central-1.amazonaws.com/progress"
+
+function getSessionId(){
+  try{
+    let sid = localStorage.getItem('crp-session-id');
+    if(!sid){
+      sid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('sid-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+      localStorage.setItem('crp-session-id', sid);
+    }
+    return sid;
+  }catch(e){
+    return 'sid-' + Date.now();
+  }
+}
+
+async function sendProgressToServer(moduleId, qs){
+  if(!PROGRESS_API_URL) return; // Not configured yet -- stays local-only, no error.
+  const payload = {
+    sessionId: getSessionId(),
+    moduleId: String(moduleId),
+    score: qs.score,
+    total: qs.total,
+    passed: (qs.score / qs.total) >= PASS_THRESHOLD,
+    eventType: "quiz_submission",
+  };
+  try{
+    await fetch(PROGRESS_API_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }catch(err){
+    // Fail silently: a blocked or offline request never affects the learner's
+    // own local progress or blocks the UI. This is best-effort sync only.
+    console.warn("Progress sync skipped (server unreachable):", err);
+  }
+}
+
 function selectAnswer(moduleId, qIndex, optIndex){
   state.quizState[moduleId].answers[qIndex] = optIndex;
   render();
@@ -1323,6 +1484,7 @@ function submitQuiz(moduleId){
   qs.score = score;
   qs.total = mod.quiz.length;
   state.quizPage[moduleId] = 0;
+  sendProgressToServer(moduleId, qs);
   render();
 }
 
@@ -1432,7 +1594,7 @@ function renderMain(){
     lastPageExtrasHtml += `<div class="fppl-badge"><span class="fppl-label">First Peoples Principle</span>${m.fppl}</div><br>`;
   }
   if(m.examples){
-    lastPageExtrasHtml += m.examples.map(ex => `<div class="example-box"><div class="label">Example</div><p>${ex}</p></div>`).join('');
+    lastPageExtrasHtml += m.examples.map(ex => `<div class="example-box"><div class="label">Example</div><p>${applyJurisdiction(ex)}</p></div>`).join('');
   }
   if(m.stageQuestions){
     const qaRevealed = state.stageQARevealed[m.id];
@@ -1446,6 +1608,19 @@ function renderMain(){
           </div>
         `).join('')}
         <button class="selfcheck-toggle" style="margin-top:4px;" onclick="toggleStageQA(${idLiteral})">${qaRevealed ? 'Hide Answers' : 'Show Answers'}</button>
+      </div>
+    `;
+  }
+  if(m.extendThinking){
+    lastPageExtrasHtml += `
+      <div class="extend-box">
+        <div class="label">Extend Your Thinking</div>
+        <p>${m.extendThinking.prompt}</p>
+        <div class="extend-links">
+          ${m.extendThinking.resources.map(r => `
+            <a href="${r.url}" target="_blank" rel="noopener" class="extend-link">${r.label} &rarr;</a>
+          `).join('')}
+        </div>
       </div>
     `;
   }
@@ -1477,9 +1652,18 @@ function renderMain(){
     const isVocabPage = curPage === vocabPageIndex;
     const isLastPage = curPage === m.pages.length - 1;
     const dots = m.pages.map((p,i) => `<div class="page-dot ${i===curPage?'active':''}" onclick="goToPage(${idLiteral},${i})"></div>`).join('');
+    const jurisdictionSelectorHtml = (m.id === 5) ? `
+      <div class="jurisdiction-picker">
+        <label for="jurisdictionSelect">Your province or territory:</label>
+        <select id="jurisdictionSelect" onchange="selectJurisdiction(this.value)">
+          ${Object.keys(JURISDICTIONS).map(key => `<option value="${key}" ${state.selectedJurisdiction===key?'selected':''}>${JURISDICTIONS[key].name}</option>`).join('')}
+        </select>
+      </div>
+    ` : '';
     learnBodyHtml = `
       <div class="page-title">${page.title}</div>
-      <div class="content-text">${page.paragraphs.map(p=>`<p>${p}</p>`).join('')}</div>
+      ${jurisdictionSelectorHtml}
+      <div class="content-text">${page.paragraphs.map(p=>`<p>${applyJurisdiction(p)}</p>`).join('')}</div>
       ${isVocabPage ? inlineVocabHtml : ''}
       <div class="page-nav">
         <button class="page-btn" ${curPage===0?'disabled':''} onclick="goToPage(${idLiteral},${curPage-1})">&larr; Back</button>
@@ -1628,13 +1812,44 @@ function setFeedbackAnswer(qid, val){
   render();
 }
 
+// Fallback destination used only by the manual "Email to FNMPC" button below,
+// in case the AWS backend isn't configured yet. Change this to whichever
+// address should receive feedback if you want a different fallback.
+const FEEDBACK_FALLBACK_EMAIL = "fchitty@fnmpc.ca";
+
 function submitFeedback(){
   const suggestions = document.getElementById('feedbackSuggestions');
   if(suggestions) state.feedbackSuggestions = suggestions.value;
   const comment = document.getElementById('feedbackComment');
   if(comment) state.feedbackComment = comment.value;
   state.feedbackSubmitted = true;
+  sendFeedbackToServer();
   render();
+}
+
+async function sendFeedbackToServer(){
+  if(!PROGRESS_API_URL) return; // Not configured yet -- use the manual download/email buttons instead.
+  const payload = {
+    sessionId: getSessionId(),
+    moduleId: "feedback",
+    score: 0,
+    total: 0,
+    passed: false,
+    eventType: "feedback",
+    ratings: state.feedbackAnswers,
+    suggestions: state.feedbackSuggestions || "",
+    comment: state.feedbackComment || "",
+  };
+  try{
+    await fetch(PROGRESS_API_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }catch(err){
+    console.warn("Feedback auto-send skipped (server unreachable):", err);
+  }
 }
 
 function feedbackAsText(){
@@ -1665,7 +1880,7 @@ function downloadFeedback(){
 function emailFeedback(){
   const subject = encodeURIComponent("Copper Ridge Course — Learner Feedback");
   const body = encodeURIComponent(feedbackAsText());
-  window.location.href = `mailto:fchitty@fnmpc.ca?subject=${subject}&body=${body}`;
+  window.location.href = `mailto:${FEEDBACK_FALLBACK_EMAIL}?subject=${subject}&body=${body}`;
 }
 
 function renderFeedbackView(){
@@ -1678,12 +1893,15 @@ function renderFeedbackView(){
     <div class="assignment-box">
   `;
   if(state.feedbackSubmitted){
+    const autoSent = !!PROGRESS_API_URL;
     html += `
       <div class="label" style="color:var(--pass-deep);">Thank you</div>
-      <p>Your feedback has been recorded below. Use the buttons to download a copy or send it directly to FNMPC.</p>
+      <p>${autoSent
+        ? "Your feedback has already been sent to FNMPC automatically. You can also download a copy for your own records below."
+        : "Your feedback has been recorded below. Use the buttons to download a copy or send it directly to FNMPC."}</p>
       <button class="primary" onclick="downloadFeedback()">Download My Feedback</button>
-      <button class="model-toggle" style="margin-left:10px;" onclick="emailFeedback()">Email to FNMPC</button>
-      <div class="log-hint" style="margin-top:14px;">In the full version of this course, feedback like yours would also be collected automatically by FNMPC — no extra step needed on your part.</div>
+      ${!autoSent ? `<button class="model-toggle" style="margin-left:10px;" onclick="emailFeedback()">Email to FNMPC</button>` : ''}
+      ${!autoSent ? `<div class="log-hint" style="margin-top:14px;">Once the AWS backend is connected, feedback like yours will be sent to FNMPC automatically — no extra step needed on your part.</div>` : ''}
     `;
   } else {
     html += FEEDBACK_QUESTIONS.map(q => `
